@@ -146,36 +146,37 @@ class DDQNAgent(object):
         if self.memory.memorySlotCounter > self.batchSize:
             state, action, reward, newState, done = self.memory.sample_buffer(self.batchSize)
 
-            # action_values = np.array(self.actionSpace, dtype=np.uint8)
-            # action_indices = np.dot(action, action_values).astype(np.uint8)
+            action_values = np.array(self.actionSpace, dtype=np.uint8)
+            action_indices = np.dot(action, action_values).astype(np.uint8)
 
-            # trainingPredictNextAction = self.trainingQNetModel.predict(new_state)
-            # targetPredictNextAction = self.targetQNetModel.predict(new_state)
-            # trainingPredictCurrentAction = self.trainingQNetModel.predict(state)
+            trainingPredictNextAction = self.trainingQNetModel.predict(newState)
+            targetPredictNextAction = self.targetQNetModel.predict(newState)
+            trainingPredictCurrentAction = self.trainingQNetModel.predict(state)
 
-            # bestAction = np.argmax(trainingPredictNextAction, axis=1)  # argMax{ Q{s,a }
-            #
-            # targetPredictCurrentAction = trainingPredictCurrentAction  # Q{s, a}
-            #
-            # batchIndex = np.arange(self.batchSize, dtype=np.int32)
-            #
-            # targetPredictCurrentAction[batchIndex, action_indices] = reward + \
-            #     self.discountFactor * targetPredictNextAction[batchIndex, bestAction.astype(int)] * done  # r + y * max(Q{s, a})
-            #
-            # _ = self.trainingQNetModel.fit(state, targetPredictCurrentAction, verbose=0)
+            bestAction = np.argmax(trainingPredictNextAction, axis=1)
 
-            QValuesForActionsOnFutureStates = self.targetQNetModel.predict(newState)
-            # The Q values of the terminal states is 0 by definition, so override them
-            QValuesForActionsOnFutureStates[done] = 0
-            # The Q values of each start state is the reward + gamma * the max next state Q value
-            maximumFutureQValue = np.max(QValuesForActionsOnFutureStates, axis=1)
-            TargetModelQValue = reward + self.discountFactor * maximumFutureQValue
-            # Fit the keras model. Note how we are passing the actions as the mask and multiplying
-            # the targets by the actions.
-            self.trainingQNetModel.fit(
-                state, TargetModelQValue[:, None],
-                epochs=1, batch_size=len(state), verbose=0
-            )
+            targetPredictCurrentAction = trainingPredictCurrentAction
+
+            batchIndex = np.arange(self.batchSize, dtype=np.int32)
+
+            targetPredictCurrentAction[batchIndex, action_indices] = reward + \
+                self.discountFactor * targetPredictNextAction[batchIndex, bestAction.astype(int)] * done
+
+            _ = self.trainingQNetModel.fit(state, targetPredictCurrentAction, verbose=0)
+
+            # QValuesForActionsOnFutureStates = self.targetQNetModel.predict(newState)
+            # QValuesForActionsOnFutureStates[done] = 0
+            #
+            # maximumFutureQValue = np.max(QValuesForActionsOnFutureStates, axis=1)
+            # TargetModelQValue = reward + self.discountFactor * maximumFutureQValue
+            # print(bestAction.shape)
+            # print(maximumFutureQValue.shape)
+            # print(state.shape)
+            # print(TargetModelQValue[:, None].shape)
+            # self.trainingQNetModel.fit(
+            #     state, TargetModelQValue[:, None],
+            #     epochs=1, batch_size=len(state), verbose=0
+            # )
 
             self.update_decisionFactor()
 
@@ -201,13 +202,88 @@ class DDQNAgent(object):
         if self.decisionFactor == 0.0:
             self.update_network_parameters()
 
+    def getModelSummary(self):
+        modelSummary = []
+        self.trainingQNetModel.summary(print_fn=lambda x: modelSummary.append(x))
+        return "\n".join(modelSummary)
 
-def rgb2gray(rgb):
-    if len(rgb.shape) == 1:
+
+class GameProcessor(object):
+    def __init__(self, gameSelection):
+        self.gameName, self.videoName, self.modelName = self.selectGameFromLibrary(gameSelection)
+        self.theGame = self.initializeGame()
+        self.isDone = False
+        self.frameCount = 0
+        self.gameScore = 0
+        self.gameFrame = None
+        self.newGameFrame = None
+        self.reward = 0
+        self.info = ""
+        self.endState = None
+        self.gameState = None
+        self.newGameState = None
+        self.resetGame()
+
+    @staticmethod
+    def selectGameFromLibrary(gameSelection):
+        print('selecting game', end="                            \r")
+        gameLibrary = {1: 'LunarLander-v2', 2: 'Breakout-v0'}
+        videoLibrary = {1: './lunar-lander-ddqn-2', 2: './breakout-ddqn-0'}
+        modelLibrary = {1: './lunar-lander-ddqn_model.h5', 2: './breakout-ddqn_model.h5'}
+        gameName = gameLibrary.get(gameSelection)
+        videoName = videoLibrary.get(gameSelection)
+        modelName = modelLibrary.get(gameSelection)
+        return gameName, videoName, modelName
+
+    def initializeGame(self):
+        print("loading game", end="                            \r")
+        theGame = gym.make(self.gameName).env
+        if showVideo:
+            theGame = wrappers.Monitor(self.theGame, self.videoName, video_callable=lambda episode_id: True, force=True)
+        return theGame
+
+    def resetGame(self):
+        self.isDone = False
+        self.frameCount = 0
+        self.gameScore = 0
+        self.gameFrame = self.theGame.reset()
+        self.gameFrame = self.rgb2gray(self.gameFrame)
+        self.gameState = np.stack([self.gameFrame] * 4, axis=2).astype(np.uint8)
+
+    def playOneGame(self, avgScore):
+        self.endState = None
+        while not self.isDone:
+            action = self.playFrame()
+            self.processNewGameFrame()
+            agent.remember(self.gameState, action, self.reward, self.newGameState, int(self.isDone))
+            agent.learn()
+            self.gameState = self.newGameState
+            printScores(i + 1, self.frameCount, self.gameScore, self.info, avgScore, agent.decisionFactor,
+                        numberOfGamesToPlay, agent.getModelSummary())
+
+    def playFrame(self):
+        action = agent.choose_action(GP.gameState)
+        for j in range(3):
+            _ = self.theGame.step(action)
+        self.newGameFrame, self.reward, self.isDone, self.info = GP.theGame.step(action)
+        self.frameCount += 1
+        self.gameScore += self.reward
+        return action
+
+    def processNewGameFrame(self):
+        if self.isDone:
+            self.endState = self.newGameFrame
+        self.newGameFrame = self.rgb2gray(self.newGameFrame)
+        self.newGameState = np.append(self.gameState[:, :, 1:],
+                                      np.expand_dims(self.newGameFrame + 2, 2), axis=2).astype(np.uint8)
+
+    @staticmethod
+    def rgb2gray(rgb):
+        if len(rgb.shape) == 1:
+            return rgb
+        rgb = cv2.resize(rgb, dsize=(80, 105), interpolation=cv2.INTER_AREA)
+        rgb = np.dot(rgb[..., :3], [0.2989, 0.5870, 0.1140]).astype(np.uint8)
         return rgb
-    rgb = cv2.resize(rgb, dsize=(80, 105), interpolation=cv2.INTER_AREA)
-    rgb = np.dot(rgb[..., :3], [0.2989, 0.5870, 0.1140]).astype(np.uint8)
-    return rgb
 
 
 def printScores(episodeId, frameCount, gameScore, info, avgScore, decisionFactor, numberOfEpisodes, modelSummary):
@@ -276,7 +352,7 @@ if __name__ == '__main__':
 
     print("enter player 1", end="                            \r")
     agent = DDQNAgent(learningRate=0.001, discountFactor=0.99, numberOfActions=numberOfActions, memorySlots=200000,
-                      decisionFactor=.10, batchSize=64, inputDimensions=inputDimensions, modelName=modelName,
+                      decisionFactor=.10, batchSize=64, inputDimensions=inputDimensions, modelName=GP.modelName,
                       decisionFactorDecayRate=0.999996, updateTargetModelFrequency=1, decisionFactorMinimum=0.1)
 
     numberOfGamesToPlay = 20
