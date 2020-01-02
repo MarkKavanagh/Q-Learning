@@ -109,10 +109,13 @@ class OutputUtils(object):
         plt.cla()
         plt.title('Decsion Factor Decay')
         plt.plot([x for x in range(len(agent.decisionFactorHistory))], agent.decisionFactorHistory, 'b')
-        plt.savefig('./thePlot.jpg', dpi=None, facecolor='w', edgecolor='w',
-                    orientation='portrait', papertype=None, format=None,
-                    transparent=False, bbox_inches=None, pad_inches=0.1,
-                    metadata=None)
+        try:
+            plt.savefig('./thePlot.jpg', dpi=None, facecolor='w', edgecolor='w',
+                        orientation='portrait', papertype=None, format=None,
+                        transparent=False, bbox_inches=None, pad_inches=0.1,
+                        metadata=None)
+        except PermissionError:
+            pass
 
     def clearOutput(self):
         if not self.isNotebook:

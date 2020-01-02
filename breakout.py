@@ -7,12 +7,12 @@ isNotebook = False
 useMaxPooling = False
 loadPreviousModel = False
 showVideo = False
-numberOfGamesToPlay = 20
+numberOfGamesToPlay = 30000
 
 
 def createAgent(inputDimensions, numberOfActions):
     print("enter player 1", end="                            \r")
-    agent = DDQNAgent(learningRate=0.001, discountFactor=0.99, numberOfActions=numberOfActions, memorySlots=200000,
+    agent = DDQNAgent(learningRate=0.001, discountFactor=0.99, numberOfActions=numberOfActions, memorySlots=300000,
                       decisionFactor=.10, batchSize=64, inputDimensions=inputDimensions, modelName=GP.modelName,
                       decisionFactorDecayRate=0.999996, updateTargetModelFrequency=1, decisionFactorMinimum=0.1,
                       useMaxPooling=useMaxPooling)
