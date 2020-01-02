@@ -1,6 +1,8 @@
 import numpy as np
 
+# noinspection PyUnresolvedReferences
 from DQNAgent import DDQNAgent
+# noinspection PyUnresolvedReferences
 from AtariGameProcessor import GameProcessor
 
 isNotebook = False
@@ -17,7 +19,7 @@ def createAgent(inputDimensions, numberOfActions):
                       decisionFactorDecayRate=0.999996, updateTargetModelFrequency=1, decisionFactorMinimum=0.1,
                       useMaxPooling=useMaxPooling)
     if loadPreviousModel:
-        agent.load_model()
+        agent.loadModel()
     return agent
 
 
@@ -40,5 +42,5 @@ if __name__ == '__main__':
         GP.plotter.updatePlot(GP, agent)
         GP.plotter.clearOutput()
         if gameNumber % 1000 == 0:
-            agent.save_model()
-    agent.save_model()
+            agent.saveModel()
+    agent.saveModel()

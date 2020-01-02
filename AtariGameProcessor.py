@@ -10,8 +10,8 @@ class GameProcessor(object):
     def __init__(self, gameSelection, numberOfGamesToPlay, showVideo=False):
         self.showVideo = showVideo
         self.numberOfGamesToPlay = numberOfGamesToPlay
-        self.gameName, self.videoName, self.modelName = self.selectGameFromLibrary(gameSelection)
-        self.theGame = self.initializeGame()
+        self.gameName, self.videoName, self.modelName = self.__selectGameFromLibrary(gameSelection)
+        self.theGame = self.__initializeGame()
         self.isDone = False
         self.gameNumber = 0
         self.frameCount = 0
@@ -27,11 +27,20 @@ class GameProcessor(object):
         self.plotter = OutputUtils()
         self.resetGame()
 
+    def selectNewGameToPlay(self, game):
+        self.__init__(game, self.numberOfGamesToPlay, self.showVideo)
+
+    def setNumberOfGamesToPlay(self, numberOfGamesToPlay):
+        self.numberOfGamesToPlay = numberOfGamesToPlay
+
+    def setShowVideo(self, showVideo):
+        self.showVideo = showVideo
+
     def addAgent(self, agent):
         self.agent = agent
 
     @staticmethod
-    def selectGameFromLibrary(gameSelection):
+    def __selectGameFromLibrary(gameSelection):
         print('selecting game', end="                            \r")
         gameLibrary = {1: 'LunarLander-v2', 2: 'Breakout-v0'}
         videoLibrary = {1: './lunar-lander-ddqn-2', 2: './breakout-ddqn-0'}
@@ -41,7 +50,7 @@ class GameProcessor(object):
         modelName = modelLibrary.get(gameSelection)
         return gameName, videoName, modelName
 
-    def initializeGame(self):
+    def __initializeGame(self):
         print("loading game", end="                            \r")
         theGame = gym.make(self.gameName).env
         if self.showVideo:
@@ -53,23 +62,23 @@ class GameProcessor(object):
         self.frameCount = 0
         self.gameScore = 0
         self.gameFrame = self.theGame.reset()
-        self.gameFrame = self.rgb2gray(self.gameFrame)
+        self.gameFrame = self.__rgb2gray(self.gameFrame)
         self.gameState = np.stack([self.gameFrame] * 4, axis=2).astype(np.uint8)
 
     def playOneGame(self, avgScore):
         self.endState = None
         self.gameNumber += 1
         while not self.isDone:
-            action = self.playFrame()
-            self.processNewGameFrame()
+            action = self.__playFrame()
+            self.__processNewGameFrame()
             self.agent.remember(self.gameState, action, self.reward, self.newGameState, int(self.isDone))
             self.agent.learn()
             self.gameState = self.newGameState
             self.plotter.printScores(self.gameNumber, self.frameCount, self.gameScore, self.info, avgScore,
                                      self.agent.decisionFactor, self.numberOfGamesToPlay, self.agent.getModelSummary())
 
-    def playFrame(self):
-        action = self.agent.choose_action(self.gameState)
+    def __playFrame(self):
+        action = self.agent.chooseAction(self.gameState)
         for j in range(3):
             _ = self.theGame.step(action)
         self.newGameFrame, self.reward, self.isDone, self.info = self.theGame.step(action)
@@ -77,15 +86,15 @@ class GameProcessor(object):
         self.gameScore += self.reward
         return action
 
-    def processNewGameFrame(self):
+    def __processNewGameFrame(self):
         if self.isDone:
             self.endState = self.newGameFrame
-        self.newGameFrame = self.rgb2gray(self.newGameFrame)
+        self.newGameFrame = self.__rgb2gray(self.newGameFrame)
         self.newGameState = np.append(self.gameState[:, :, 1:],
                                       np.expand_dims(self.newGameFrame + 2, 2), axis=2).astype(np.uint8)
 
     @staticmethod
-    def rgb2gray(rgb):
+    def __rgb2gray(rgb):
         if len(rgb.shape) == 1:
             return rgb
         rgb = cv2.resize(rgb, dsize=(80, 105), interpolation=cv2.INTER_AREA)

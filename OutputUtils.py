@@ -9,18 +9,28 @@ import os
 class OutputUtils(object):
     def __init__(self):
         self.isNotebook = False
-        self.stdOut = self.getStdOut(self.isNotebook)
+        self.stdOut = self.__getStdOut(self.isNotebook)
         self.process = psutil.Process(os.getpid())
 
     def setIsNotebook(self, isNotebook):
         self.isNotebook = isNotebook
-        self.stdOut = self.getStdOut(isNotebook)
+        self.stdOut = self.__getStdOut(isNotebook)
+
+    @staticmethod
+    def __getStdOut(isNotebook):
+        if not isNotebook:
+            stdOut = curses.initscr()
+            curses.noecho()
+            curses.cbreak()
+        else:
+            stdOut = None
+        return stdOut
 
     def printScores(self, episodeId, frameCount, gameScore, info, avgScore,
                     decisionFactor, numberOfEpisodes, modelSummary):
-        maxRawLength, maxLength = self.getMaxLengths(numberOfEpisodes, gameScore, avgScore)
-        lines = self.formatOutput(maxLength, maxRawLength, episodeId, gameScore, avgScore,
-                                  frameCount, info, decisionFactor, modelSummary, self.process)
+        maxRawLength, maxLength = self.__getMaxLengths(numberOfEpisodes, gameScore, avgScore)
+        lines = self.__formatOutput(maxLength, maxRawLength, episodeId, gameScore, avgScore,
+                                    frameCount, info, decisionFactor, modelSummary, self.process)
         if not self.isNotebook:
             for i in range(len(lines)):
                 self.stdOut.addstr(i, 0, lines[i])
@@ -31,7 +41,7 @@ class OutputUtils(object):
             clear_output(wait=True)
 
     @staticmethod
-    def getMaxLengths(numberOfEpisodes, gameScore, avgScore):
+    def __getMaxLengths(numberOfEpisodes, gameScore, avgScore):
         episodeLength = int(np.floor(np.log10(numberOfEpisodes)) + 1)
         scoreLength = int(np.floor(max(np.log10(max(abs(gameScore), 0.01)), 0)) + 1)
         avgScoreLength = int(np.floor(max(np.log10(max(abs(avgScore), 0.01)), 0)) + 4)
@@ -43,8 +53,8 @@ class OutputUtils(object):
         return maxRawLength, maxLength
 
     @staticmethod
-    def formatOutput(maxLength, maxRawLength, episodeId, gameScore, avgScore,
-                     frameCount, info, decisionFactor, modelSummary, process):
+    def __formatOutput(maxLength, maxRawLength, episodeId, gameScore, avgScore,
+                       frameCount, info, decisionFactor, modelSummary, process):
         lines = []
         padding = int(max(maxLength - maxRawLength - len('      Episode: '), 0)) * ' '
         lines.append("      Episode: {id:{n}d}{padding} Frame: {frame:d}"
@@ -60,16 +70,6 @@ class OutputUtils(object):
                      .format(memory=process.memory_info()[0] / 1024 ** 3))
         lines.append(modelSummary)
         return lines
-
-    @staticmethod
-    def getStdOut(isNotebook):
-        if not isNotebook:
-            stdOut = curses.initscr()
-            curses.noecho()
-            curses.cbreak()
-        else:
-            stdOut = None
-        return stdOut
 
     @staticmethod
     def initializePlot(agent):

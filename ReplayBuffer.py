@@ -13,7 +13,7 @@ class ReplayBuffer(object):
         self.rewardMemory = np.zeros(self.memorySlots, dtype=np.int8)
         self.isDoneMemory = np.zeros(self.memorySlots, dtype=np.uint8)
 
-    def store_transition(self, state, action, reward, outcomeState, isDone):
+    def storeTransition(self, state, action, reward, outcomeState, isDone):
         index = self.memorySlotCounter % self.memorySlots
         self.stateMemory[index] = state
         self.outcomeStateMemory[index] = outcomeState
@@ -27,7 +27,7 @@ class ReplayBuffer(object):
         self.isDoneMemory[index] = 1 - isDone
         self.memorySlotCounter += 1
 
-    def sample_buffer(self, batchSize):
+    def sampleBuffer(self, batchSize):
         max_mem = min(self.memorySlotCounter, self.memorySlots)
         batch = np.random.choice(max_mem, batchSize)
 

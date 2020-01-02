@@ -6,29 +6,29 @@ from keras import backend as K
 
 class QNetBuilder(object):
     def __init__(self, learningRate, numberOfActions, inputDimensions, useMaxPooling=False):
-        self.model = self.buildNeuralNet(learningRate, numberOfActions, inputDimensions, useMaxPooling)
+        self.model = self.__buildNeuralNet(learningRate, numberOfActions, inputDimensions, useMaxPooling)
 
-    def get_model(self):
+    def getModel(self):
         return self.model
 
     @staticmethod
-    def load_model(modelName):
-        return load_model(modelName, custom_objects={'huber_loss': QNetBuilder.huber_loss})
+    def loadModel(modelName):
+        return load_model(modelName, custom_objects={'huber_loss': QNetBuilder.__huberLoss})
 
-    def buildNeuralNet(self, learningRate, numberOfActions, inputDimensions, useMaxPooling):
+    def __buildNeuralNet(self, learningRate, numberOfActions, inputDimensions, useMaxPooling):
         inputs = Input(shape=inputDimensions, name="Input_Layer")
         if len(inputDimensions) > 1:
-            cnnLayers = self.buildCnnLayers(inputs, useMaxPooling)
-            fullyConnectedLayers = self.buildFullyConnectedLayers(cnnLayers)
+            cnnLayers = self.__buildCnnLayers(inputs, useMaxPooling)
+            fullyConnectedLayers = self.__buildFullyConnectedLayers(cnnLayers)
         else:
-            fullyConnectedLayers = self.buildFullyConnectedLayers(inputs)
+            fullyConnectedLayers = self.__buildFullyConnectedLayers(inputs)
         outputs = Dense(numberOfActions, name="Output_Layer")(fullyConnectedLayers)
         model = Model(inputs=inputs, outputs=outputs, name="Deep Q-Learning CNN Model")
-        model.compile(optimizer=Adam(lr=learningRate), loss=self.huber_loss)
+        model.compile(optimizer=Adam(lr=learningRate), loss=self.__huberLoss)
         return model
 
     @staticmethod
-    def buildCnnLayers(previousLayer, useMaxPooling):
+    def __buildCnnLayers(previousLayer, useMaxPooling):
         cnnFilters = (32, 64, 64)
         cnnSizes = ((8, 8), (4, 4), (2, 2))
         cnnStrides = ((4, 4), (2, 2), (2, 2))
@@ -44,7 +44,7 @@ class QNetBuilder(object):
         return Flatten(name="Flatten_Layer")(prev)
 
     @staticmethod
-    def buildFullyConnectedLayers(previousLayer):
+    def __buildFullyConnectedLayers(previousLayer):
         fcLayers = (256, 256)
         layer = Dense(fcLayers[0], name="Hidden-1", activation="relu")(previousLayer)
         for i in range(1, len(fcLayers)):
@@ -52,7 +52,7 @@ class QNetBuilder(object):
         return layer
 
     @staticmethod
-    def huber_loss(expected, predicted, in_keras=True):
+    def __huberLoss(expected, predicted, in_keras=True):
         error = expected - predicted
         quadratic_term = error * error / 2
         linear_term = abs(error) - 1 / 2

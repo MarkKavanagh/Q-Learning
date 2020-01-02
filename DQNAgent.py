@@ -20,16 +20,16 @@ class DDQNAgent(object):
         self.modelName = modelName
         self.updateTargetModelFrequency = updateTargetModelFrequency
         self.memory = ReplayBuffer(memorySlots, inputDimensions, numberOfActions, discreteActions=True)
-        self.trainingQNetModel = QNetBuilder(learningRate, numberOfActions, inputDimensions, useMaxPooling).get_model()
-        self.targetQNetModel = QNetBuilder(learningRate, numberOfActions, inputDimensions, useMaxPooling).get_model()
+        self.trainingQNetModel = QNetBuilder(learningRate, numberOfActions, inputDimensions, useMaxPooling).getModel()
+        self.targetQNetModel = QNetBuilder(learningRate, numberOfActions, inputDimensions, useMaxPooling).getModel()
         self.scoreHistory = np.array([0])
         self.decisionFactorHistory = np.array([1])
         self.avgScoreHistory = np.array([0])
 
     def remember(self, state, action, reward, new_state, done):
-        self.memory.store_transition(state, action, reward, new_state, done)
+        self.memory.storeTransition(state, action, reward, new_state, done)
 
-    def choose_action(self, state):
+    def chooseAction(self, state):
         rand = np.random.random()
         if rand < self.decisionFactor:
             action = np.random.choice(self.actionSpace)
@@ -41,7 +41,7 @@ class DDQNAgent(object):
 
     def learn(self):
         if self.memory.memorySlotCounter > self.batchSize:
-            state, action, reward, newState, done = self.memory.sample_buffer(self.batchSize)
+            state, action, reward, newState, done = self.memory.sampleBuffer(self.batchSize)
 
             action_values = np.array(self.actionSpace, dtype=np.uint8)
             action_indices = np.dot(action, action_values).astype(np.uint8)
@@ -75,28 +75,28 @@ class DDQNAgent(object):
             #     epochs=1, batch_size=len(state), verbose=0
             # )
 
-            self.update_decisionFactor()
+            self.__updateDecisionFactor()
 
             if self.memory.memorySlotCounter % self.updateTargetModelFrequency == 0:
-                self.update_network_parameters()
+                self.__updateNetworkParameters()
 
-    def update_decisionFactor(self):
+    def __updateDecisionFactor(self):
         self.decisionFactor = self.decisionFactor * self.decisionFactorDecayRate if self.decisionFactor > \
             self.decisionFactorMinimum else self.decisionFactorMinimum
 
-    def update_network_parameters(self):
+    def __updateNetworkParameters(self):
         tau = 0.0001
         self.targetQNetModel.set_weights(
             [(1 - tau) * w for w in self.trainingQNetModel.get_weights()] +
             [tau * w for w in self.trainingQNetModel.get_weights()])
 
-    def save_model(self):
+    def saveModel(self):
         self.trainingQNetModel.save(self.modelName)
 
-    def load_model(self):
-        self.trainingQNetModel = QNetBuilder.load_model(self.modelName)
+    def loadModel(self):
+        self.trainingQNetModel = QNetBuilder.loadModel(self.modelName)
         if self.decisionFactor == 0.0:
-            self.update_network_parameters()
+            self.__updateNetworkParameters()
 
     def getModelSummary(self):
         modelSummary = []
