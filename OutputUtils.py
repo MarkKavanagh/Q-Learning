@@ -7,6 +7,8 @@ import os
 
 
 class OutputUtils(object):
+    __slots__ = ["isNotebook", "stdOut", "process"]
+
     def __init__(self):
         self.isNotebook = False
         self.stdOut = self.__getStdOut(self.isNotebook)
@@ -89,6 +91,7 @@ class OutputUtils(object):
         plt.plot([x for x in range(len(agent.decisionFactorHistory))], agent.decisionFactorHistory, 'b')
 
     @staticmethod
+    # @profile(stream=fp)
     def updatePlot(GP, agent):
         plt.clf()
         plt.subplot(2, 2, 1)

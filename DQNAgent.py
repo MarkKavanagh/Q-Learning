@@ -6,6 +6,10 @@ from ReplayBuffer import ReplayBuffer
 
 
 class DDQNAgent(object):
+    __slots__ = ["actionSpace", "numberOfActions", "discountFactor", "decisionFactor", "decisionFactorDecayRate",
+                 "decisionFactorMinimum", "batchSize", "modelName", "updateTargetModelFrequency", "memory",
+                 "trainingQNetModel", "targetQNetModel", "scoreHistory", "decisionFactorHistory", "avgScoreHistory"]
+
     def __init__(self, learningRate, discountFactor, numberOfActions, decisionFactor, batchSize,
                  inputDimensions, decisionFactorDecayRate=0.996, decisionFactorMinimum=0.01,
                  memorySlots=1000000, modelName='ddqn_model.h5', updateTargetModelFrequency=100,

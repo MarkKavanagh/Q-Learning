@@ -2,11 +2,17 @@ import numpy as np
 import gym
 from gym import wrappers
 import cv2
+import gc
 # noinspection PyUnresolvedReferences
 from OutputUtils import OutputUtils
 
 
 class GameProcessor(object):
+    __slots__ = ["showVideo", "numberOfGamesToPlay", "gameName", "videoName", "modelName",
+                 "theGame", "isDone", "gameNumber", "frameCount", "gameScore", "gameFrame",
+                 "newGameFrame", "reward", "info", "endState", "gameState", "newGameState",
+                 "agent", "plotter"]
+
     def __init__(self, gameSelection, numberOfGamesToPlay, showVideo=False):
         self.showVideo = showVideo
         self.numberOfGamesToPlay = numberOfGamesToPlay
@@ -64,6 +70,22 @@ class GameProcessor(object):
         self.gameFrame = self.theGame.reset()
         self.gameFrame = self.__rgb2gray(self.gameFrame)
         self.gameState = np.stack([self.gameFrame] * 4, axis=2).astype(np.uint8)
+
+    def playGames(self):
+        gc.enable()
+        avgScore = 0
+        for gameNumber in range(self.numberOfGamesToPlay):
+            self.resetGame()
+            self.playOneGame(avgScore)
+            self.agent.decisionFactorHistory = np.append(self.agent.decisionFactorHistory, self.agent.decisionFactor)
+            self.agent.scoreHistory = np.append(self.agent.scoreHistory, self.gameScore)
+            avgScore = np.mean(self.agent.scoreHistory[max(0, gameNumber - 100):(gameNumber + 1)])
+            self.agent.avgScoreHistory = np.append(self.agent.avgScoreHistory, avgScore)
+            self.plotter.updatePlot(self, self.agent)
+            self.plotter.clearOutput()
+            gc.collect()
+            if gameNumber % 1000 == 0:
+                self.agent.saveModel()
 
     def playOneGame(self, avgScore):
         self.endState = None

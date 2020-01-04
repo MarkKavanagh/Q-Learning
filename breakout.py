@@ -1,5 +1,3 @@
-import numpy as np
-
 # noinspection PyUnresolvedReferences
 from DQNAgent import DDQNAgent
 # noinspection PyUnresolvedReferences
@@ -9,38 +7,39 @@ isNotebook = False
 useMaxPooling = False
 loadPreviousModel = False
 showVideo = False
-numberOfGamesToPlay = 30000
+numberOfGamesToPlay = 50000
+memorySlots = 90000
+learningRate = 0.0001
+decisionFactor = 1.00
+decisionFactorDecayRate = 0.999996
+decisionFactorMinimum = 0.1
+discountFactor = 0.99
+batchSize = 64
+gameNumberForLibrary = 2
+updateTargetModelFrequency = 1
 
 
-def createAgent(inputDimensions, numberOfActions):
-    print("enter player 1", end="                            \r")
-    agent = DDQNAgent(learningRate=0.001, discountFactor=0.99, numberOfActions=numberOfActions, memorySlots=300000,
-                      decisionFactor=.10, batchSize=64, inputDimensions=inputDimensions, modelName=GP.modelName,
-                      decisionFactorDecayRate=0.999996, updateTargetModelFrequency=1, decisionFactorMinimum=0.1,
-                      useMaxPooling=useMaxPooling)
+def createAgent(inputDimensions, numberOfActions, modelName):
+    agent = DDQNAgent(learningRate=learningRate, discountFactor=discountFactor, numberOfActions=numberOfActions,
+                      memorySlots=memorySlots, decisionFactor=decisionFactor, batchSize=batchSize,
+                      inputDimensions=inputDimensions, modelName=modelName, useMaxPooling=useMaxPooling,
+                      decisionFactorDecayRate=decisionFactorDecayRate, decisionFactorMinimum=decisionFactorMinimum,
+                      updateTargetModelFrequency=updateTargetModelFrequency)
     if loadPreviousModel:
         agent.loadModel()
     return agent
 
 
-if __name__ == '__main__':
-    GP = GameProcessor(2, numberOfGamesToPlay)
+def main():
+    GP = GameProcessor(gameNumberForLibrary, numberOfGamesToPlay)
     GP.plotter.setIsNotebook(isNotebook)
     inputDimensions = GP.gameState.shape
     numberOfActions = GP.theGame.action_space.n
-    agent = createAgent(inputDimensions, numberOfActions)
-    GP.addAgent(agent)
-    avgScore = 0
-    GP.plotter.initializePlot(agent)
-    for gameNumber in range(numberOfGamesToPlay):
-        GP.resetGame()
-        GP.playOneGame(avgScore)
-        agent.decisionFactorHistory = np.append(agent.decisionFactorHistory, agent.decisionFactor)
-        agent.scoreHistory = np.append(agent.scoreHistory, GP.gameScore)
-        avgScore = np.mean(agent.scoreHistory[max(0, gameNumber - 100):(gameNumber + 1)])
-        agent.avgScoreHistory = np.append(agent.avgScoreHistory, avgScore)
-        GP.plotter.updatePlot(GP, agent)
-        GP.plotter.clearOutput()
-        if gameNumber % 1000 == 0:
-            agent.saveModel()
-    agent.saveModel()
+    GP.addAgent(createAgent(inputDimensions, numberOfActions, GP.modelName))
+    GP.plotter.initializePlot(GP.agent)
+    GP.playGames()
+    GP.agent.saveModel()
+
+
+if __name__ == '__main__':
+    main()

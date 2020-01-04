@@ -2,6 +2,9 @@ import numpy as np
 
 
 class ReplayBuffer(object):
+    __slots__ = ["memorySlots", "memorySlotCounter", "discreteActions", "stateMemory", "outcomeStateMemory",
+                 "actionMemory", "rewardMemory", "isDoneMemory"]
+
     def __init__(self, memorySlots, inputShape, numberOfActions, discreteActions=True):
         self.memorySlots = memorySlots
         self.memorySlotCounter = 0
