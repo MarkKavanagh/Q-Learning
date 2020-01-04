@@ -25,9 +25,7 @@ class TestDDQNAgent(TestCase):
         agent.memory.memorySlotCounter = memorySlots
         agent.memory.stateMemory = np.random.randint(100, size=(memorySlots, *inputDimensions)).astype(uint8)
         agent.memory.outcomeStateMemory = np.random.randint(100, size=(memorySlots, *inputDimensions)).astype(uint8)
-        # agent.memory.actionMemory = np.random.randint(4, size=(memorySlots, numberOfActions)).astype(int8)
         actions = np.random.randint(numberOfActions, size=memorySlots)
-        # b = np.zeros((actions.size, actions.max() + 1))
         agent.memory.actionMemory[np.arange(actions.size), actions] = 1
         agent.memory.rewardMemory = np.random.randint(100, size=memorySlots).astype(int8)
         agent.memory.isDoneMemory = np.random.randint(2, size=memorySlots).astype(uint8)
