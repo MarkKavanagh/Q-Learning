@@ -47,37 +47,33 @@ class DDQNAgent(object):
         if self.memory.memorySlotCounter > self.batchSize:
             state, action, reward, newState, done = self.memory.sampleBuffer(self.batchSize)
 
-            action_values = np.array(self.actionSpace, dtype=np.uint8)
-            action_indices = np.dot(action, action_values).astype(np.uint8)
+            # action_values = np.array(self.actionSpace, dtype=np.uint8)
+            # action_indices = np.dot(action, action_values).astype(np.uint8)
 
-            trainingPredictNextAction = self.trainingQNetModel.predict(newState)
-            targetPredictNextAction = self.targetQNetModel.predict(newState)
-            trainingPredictCurrentAction = self.trainingQNetModel.predict(state)
-
-            bestAction = np.argmax(trainingPredictNextAction, axis=1)
-
-            targetPredictCurrentAction = trainingPredictCurrentAction
-
-            batchIndex = np.arange(self.batchSize, dtype=np.int32)
-
-            targetPredictCurrentAction[batchIndex, action_indices] = reward + \
-                self.discountFactor * targetPredictNextAction[batchIndex, bestAction.astype(int)] * done
-
-            _ = self.trainingQNetModel.fit(state, targetPredictCurrentAction, verbose=0)
-
-            # QValuesForActionsOnFutureStates = self.targetQNetModel.predict(newState)
-            # QValuesForActionsOnFutureStates[done] = 0
+            # trainingPredictNextAction = self.trainingQNetModel.predict(newState)
+            # targetPredictNextAction = self.targetQNetModel.predict(newState)
+            # trainingPredictCurrentAction = self.trainingQNetModel.predict(state)
             #
-            # maximumFutureQValue = np.max(QValuesForActionsOnFutureStates, axis=1)
-            # TargetModelQValue = reward + self.discountFactor * maximumFutureQValue
-            # print(bestAction.shape)
-            # print(maximumFutureQValue.shape)
-            # print(state.shape)
-            # print(TargetModelQValue[:, None].shape)
-            # self.trainingQNetModel.fit(
-            #     state, TargetModelQValue[:, None],
-            #     epochs=1, batch_size=len(state), verbose=0
-            # )
+            # bestAction = np.argmax(trainingPredictNextAction, axis=1)
+            #
+            # targetPredictCurrentAction = trainingPredictCurrentAction
+            #
+            # batchIndex = np.arange(self.batchSize, dtype=np.int32)
+            #
+            # targetPredictCurrentAction[batchIndex, action_indices] = reward + \
+            #     self.discountFactor * targetPredictNextAction[batchIndex, bestAction.astype(int)] * done
+
+            # _ = self.trainingQNetModel.fit(state, targetPredictCurrentAction, verbose=0)
+
+            QValuesForActionsOnFutureStates = self.targetQNetModel.predict(newState)
+            QValuesForActionsOnFutureStates[done] = 0
+
+            maximumFutureQValue = np.max(QValuesForActionsOnFutureStates, axis=1)
+            TargetModelQValue = reward + self.discountFactor * maximumFutureQValue
+            _ = self.trainingQNetModel.fit(
+                state, action * TargetModelQValue[:, None],
+                epochs=1, batch_size=self.batchSize, verbose=0
+            )
 
             self.__updateDecisionFactor()
 
