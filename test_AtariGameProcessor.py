@@ -1,5 +1,5 @@
 from unittest import TestCase
-from Qlearning.AtariGameProcessor import GameProcessor
+from AtariGameProcessor import GameProcessor
 
 
 class TestGameProcessor(TestCase):

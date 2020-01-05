@@ -1,7 +1,6 @@
 from unittest import TestCase
 import numpy as np
 from numpy import uint8, int8
-# noinspection PyUnresolvedReferences
 from DQNAgent import DDQNAgent
 
 
