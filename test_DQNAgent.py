@@ -6,19 +6,28 @@ from DQNAgent import DDQNAgent
 
 
 class TestDDQNAgent(TestCase):
+    def setUp(self):
+        self.inputDimensions = (84, 84, 4)
+        self.memorySlots = 100
+        self.numberOfActions = 4
+        self.agent = DDQNAgent(memorySlots=self.memorySlots, decisionFactor=1.0,
+                               batchSize=64,
+                               inputDimensions=self.inputDimensions, modelName="modelName", useMaxPooling=False,
+                               decisionFactorDecayRate=0.99996, numberOfActions=self.numberOfActions,
+                               decisionFactorMinimum=0.1, discountFactor=0.99,
+                               updateTargetModelFrequency=1,
+                               learningRate=0.0001)
+
+    def test_chooseAction(self):
+        self.randomizeReplayBuffer(self.agent, self.inputDimensions, self.memorySlots, self.numberOfActions)
+        state = self.agent.memory.stateMemory[0]
+        action = self.agent.chooseAction(state)
+        self.assertTrue(0 <= action < self.numberOfActions)
+        self.assertTrue(type(action) == uint8)
+
     def test_learn(self):
-        inputDimensions = (84, 84, 4)
-        memorySlots = 100
-        numberOfActions = 4
-        agent = DDQNAgent(memorySlots=memorySlots, decisionFactor=1.0,
-                          batchSize=64,
-                          inputDimensions=inputDimensions, modelName="modelName", useMaxPooling=False,
-                          decisionFactorDecayRate=0.99996, numberOfActions=numberOfActions,
-                          decisionFactorMinimum=0.1, discountFactor=0.99,
-                          updateTargetModelFrequency=1,
-                          learningRate=0.0001)
-        self.randomizeReplayBuffer(agent, inputDimensions, memorySlots, numberOfActions)
-        agent.learn()
+        self.randomizeReplayBuffer(self.agent, self.inputDimensions, self.memorySlots, self.numberOfActions)
+        self.agent.learn()
 
     @staticmethod
     def randomizeReplayBuffer(agent, inputDimensions, memorySlots, numberOfActions):

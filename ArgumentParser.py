@@ -7,7 +7,31 @@ class ArgumentParser(object):
                  "batchSize", "gameNumberForLibrary", "updateTargetModelFrequency", "parser"]
 
     def __init__(self):
-        self.parser = argparse.ArgumentParser()
+        self.parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
+                                              description="""
+Q-Learning Algorithm
+----------------------------------------------------------------------------------------------------------------------
+| Program for applying Q-Learning to Atari games from OpenAI's gym environments (or any custom game with the         |
+| proper methods/returns defined). For each step of the game, the game outputs a reward and an image of the game.    |
+|                                                                                                                    |
+| The DDQN Agent takes four consecutive game frames and stacks them as a game state. The model uses the game state   |
+| to predict the best action (or randomly chooses actions). This action is performed, and the resulting game state   |
+| and rewards are stored in the Agent's memory. The Agent uses these memories to train its Q-Net.                    |
+|                                                                                                                    |
+| Q-Learning Equation:                                                                                               |
+| Q{state, action} = reward + discount * max[Q{state', action'}]  # where the tick is future state/action            |
+|                                                                                                                    |
+| Model Fit:                                                                                                         |
+| Model(input=gameState output=training_Q_Value)                                                                     |
+| Input: Four grayscale game frames                                                                                  |
+| Layers: 3 CNN Layers to filter images (Optional: Max Pooling Layers)                                               |
+|         Flatten Layers to convert CNN data to 1D-array                                                             |
+|         2 Hidden Fully-connected Layers                                                                            |
+|         1 Output Layer (Q-Values for each possible action i.e., Q{state', action'})                                |
+| Fit: Q{state, action} - training_QValue                                                                            |
+| Loss: logcosh (similar to MSE and Huber Loss)                                                                      |
+----------------------------------------------------------------------------------------------------------------------
+        """)
         self.isNotebook = False
         self.useMaxPooling = False
         self.loadPreviousModel = False

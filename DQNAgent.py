@@ -68,8 +68,8 @@ class DDQNAgent(object):
             else:
                 QValuesForActionsOnFutureStates = self.targetQNetModel.predict(newState)
                 QValuesForActionsOnFutureStates[done] = 0
-
                 maximumFutureQValue = np.max(QValuesForActionsOnFutureStates, axis=1)
+
                 TargetModelQValue = reward + self.discountFactor * maximumFutureQValue
                 _ = self.trainingQNetModel.fit(
                     state, action * TargetModelQValue[:, None],
