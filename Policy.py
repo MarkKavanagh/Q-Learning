@@ -46,7 +46,7 @@ class QNetBuilder(object):
 
     @staticmethod
     def __buildFullyConnectedLayers(previousLayer):
-        fcLayers = (256, 256)
+        fcLayers = (512,)
         layer = Dense(fcLayers[0], name="Hidden-1", activation="relu")(previousLayer)
         for i in range(1, len(fcLayers)):
             layer = Dense(fcLayers[i], name="Hidden-{n}".format(n=i + 1), activation="relu")(layer)

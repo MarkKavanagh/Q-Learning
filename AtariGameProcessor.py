@@ -13,6 +13,21 @@ class GameProcessor(object):
                  "agent", "plotter"]
 
     def __init__(self, gameSelection, numberOfGamesToPlay, showVideo=False):
+        self.numberOfGamesToPlay = numberOfGamesToPlay
+        self.showVideo = showVideo
+        self.agent = None
+        self.isDone = False
+        self.frameCount = 0
+        self.gameScore = 0
+        self.gameFrame = None
+        self.gameState = None
+        self.endState = None
+        self.__resetVariables(gameSelection, numberOfGamesToPlay, showVideo)
+
+    def selectNewGameToPlay(self, game):
+        self.__resetVariables(game, self.numberOfGamesToPlay, self.showVideo)
+
+    def __resetVariables(self, gameSelection, numberOfGamesToPlay, showVideo):
         self.showVideo = showVideo
         self.numberOfGamesToPlay = numberOfGamesToPlay
         self.gameName, self.videoName, self.modelName = self.__selectGameFromLibrary(gameSelection)
@@ -29,11 +44,8 @@ class GameProcessor(object):
         self.gameState = None
         self.newGameState = None
         self.agent = None
-        self.plotter = OutputUtils()
+        # self.plotter = OutputUtils()
         self.resetGame()
-
-    def selectNewGameToPlay(self, game):
-        self.__init__(game, self.numberOfGamesToPlay, self.showVideo)
 
     def setNumberOfGamesToPlay(self, numberOfGamesToPlay):
         self.numberOfGamesToPlay = numberOfGamesToPlay
@@ -68,7 +80,10 @@ class GameProcessor(object):
         self.gameScore = 0
         self.gameFrame = self.theGame.reset()
         self.gameFrame = self.__rgb2gray(self.gameFrame)
-        self.gameState = np.stack([self.gameFrame] * 4, axis=2).astype(np.uint8)
+        try:
+            self.gameState = np.stack([self.gameFrame] * 4, axis=2).astype(np.uint8)
+        except np.AxisError:
+            self.gameState = np.stack([self.gameFrame] * 4, axis=1).astype(np.uint8)
 
     def playGames(self):
         gc.enable()
