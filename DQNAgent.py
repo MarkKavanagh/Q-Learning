@@ -6,12 +6,13 @@ from ReplayBuffer import ReplayBuffer
 class DDQNAgent(object):
     __slots__ = ["actionSpace", "numberOfActions", "discountFactor", "decisionFactor", "decisionFactorDecayRate",
                  "decisionFactorMinimum", "batchSize", "modelName", "updateTargetModelFrequency", "memory",
-                 "trainingQNetModel", "targetQNetModel", "scoreHistory", "decisionFactorHistory", "avgScoreHistory"]
+                 "trainingQNetModel", "targetQNetModel", "scoreHistory", "decisionFactorHistory", "avgScoreHistory",
+                 "learningFrequency"]
 
     def __init__(self, learningRate, discountFactor, numberOfActions, decisionFactor, batchSize,
                  inputDimensions, decisionFactorDecayRate=0.996, decisionFactorMinimum=0.01,
                  memorySlots=1000000, modelName='ddqn_model.h5', updateTargetModelFrequency=100,
-                 useMaxPooling=False):
+                 learningFrequency=1, useMaxPooling=False):
         self.actionSpace = np.arange(numberOfActions, dtype=np.uint8)
         self.numberOfActions = numberOfActions
         self.discountFactor = discountFactor
@@ -27,6 +28,7 @@ class DDQNAgent(object):
         self.scoreHistory = np.array([0])
         self.decisionFactorHistory = np.array([1])
         self.avgScoreHistory = np.array([0])
+        self.learningFrequency = learningFrequency
 
     def remember(self, state, action, reward, new_state, done):
         self.memory.storeTransition(state, action, reward, new_state, done)
@@ -39,9 +41,12 @@ class DDQNAgent(object):
             state = state[np.newaxis, :]
             actions = self.trainingQNetModel.predict(state)
             action = np.argmax(actions)
+        self.learningFrequency += 1
         return action
 
     def learn(self):
+        if self.learningFrequency % 4 != 0:
+            return
         version = 2
         if self.memory.memorySlotCounter > self.batchSize:
             state, action, reward, newState, done = self.memory.sampleBuffer(self.batchSize)
@@ -84,10 +89,13 @@ class DDQNAgent(object):
             self.decisionFactorMinimum else self.decisionFactorMinimum
 
     def __updateNetworkParameters(self):
-        tau = 0.0001
-        self.targetQNetModel.set_weights(
-            [(1 - tau) * w for w in self.trainingQNetModel.get_weights()] +
-            [tau * w for w in self.trainingQNetModel.get_weights()])
+        if self.updateTargetModelFrequency == 1:
+            tau = 0.0001
+            self.targetQNetModel.set_weights(
+                [(1 - tau) * w for w in self.trainingQNetModel.get_weights()] +
+                [tau * w for w in self.trainingQNetModel.get_weights()])
+        else:
+            self.targetQNetModel.set_weights(self.trainingQNetModel.get_weights())
 
     def saveModel(self):
         self.trainingQNetModel.save(self.modelName)

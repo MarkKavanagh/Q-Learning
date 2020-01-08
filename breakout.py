@@ -8,7 +8,8 @@ def createAgent(parser, inputDimensions, numberOfActions, modelName):
                       inputDimensions=inputDimensions, modelName=modelName, useMaxPooling=parser.useMaxPooling,
                       decisionFactorDecayRate=parser.decisionFactorDecayRate, numberOfActions=numberOfActions,
                       decisionFactorMinimum=parser.decisionFactorMinimum, discountFactor=parser.discountFactor,
-                      updateTargetModelFrequency=parser.updateTargetModelFrequency, learningRate=parser.learningRate)
+                      updateTargetModelFrequency=parser.updateTargetModelFrequency, learningRate=parser.learningRate,
+                      learningFrequency=parser.learningFrequency)
     if parser.loadPreviousModel:
         agent.loadModel()
     return agent

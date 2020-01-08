@@ -44,7 +44,7 @@ class GameProcessor(object):
         self.gameState = None
         self.newGameState = None
         self.agent = None
-        # self.plotter = OutputUtils()
+        self.plotter = OutputUtils()
         self.resetGame()
 
     def setNumberOfGamesToPlay(self, numberOfGamesToPlay):
@@ -115,8 +115,6 @@ class GameProcessor(object):
 
     def __playFrame(self):
         action = self.agent.chooseAction(self.gameState)
-        for j in range(3):
-            _ = self.theGame.step(action)
         self.newGameFrame, self.reward, self.isDone, self.info = self.theGame.step(action)
         self.frameCount += 1
         self.gameScore += self.reward

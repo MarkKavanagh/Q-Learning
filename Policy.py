@@ -31,7 +31,7 @@ class QNetBuilder(object):
     @staticmethod
     def __buildCnnLayers(previousLayer, useMaxPooling):
         cnnFilters = (32, 64, 64)
-        cnnSizes = ((8, 8), (4, 4), (2, 2))
+        cnnSizes = ((8, 8), (4, 4), (3, 3))
         cnnStrides = ((4, 4), (2, 2), (2, 2))
         prev = Lambda(lambda x: x / 255.0, name="Normalized_RGB")(previousLayer)
         for i in range(len(cnnFilters)):
