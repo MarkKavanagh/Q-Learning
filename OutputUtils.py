@@ -101,7 +101,7 @@ class OutputUtils(object):
         plt.subplot(2, 2, 2)
         plt.cla()
         plt.title('Score Distribution')
-        plt.hist(agent.scoreHistory, [x for x in range(max(max(agent.scoreHistory), 10))], color='b', align='left')
+        plt.hist(agent.scoreHistory, [x for x in range(int(max(max(agent.scoreHistory), 10)))], color='b', align='left')
         plt.subplot(2, 2, 3)
         plt.cla()
         plt.title('Game Score Progression')
