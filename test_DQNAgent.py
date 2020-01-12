@@ -26,7 +26,9 @@ class TestDDQNAgent(TestCase):
 
     def test_learn(self):
         self.randomizeReplayBuffer(self.agent, self.inputDimensions, self.memorySlots, self.numberOfActions)
-        self.agent.learn()
+        for i in range(4):
+            self.agent.learn()
+            print(self.agent.accuracy)
 
     @staticmethod
     def randomizeReplayBuffer(agent, inputDimensions, memorySlots, numberOfActions):

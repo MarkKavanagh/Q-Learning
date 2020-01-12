@@ -92,9 +92,7 @@ class GameProcessor(object):
             self.resetGame()
             self.playOneGame(avgScore)
             self.agent.decisionFactorHistory = np.append(self.agent.decisionFactorHistory, self.agent.decisionFactor)
-            self.agent.scoreHistory = np.append(self.agent.scoreHistory, self.gameScore)
-            avgScore = np.mean(self.agent.scoreHistory[max(0, gameNumber - 100):(gameNumber + 1)])
-            self.agent.avgScoreHistory = np.append(self.agent.avgScoreHistory, avgScore)
+            self.agent.appendStats(gameNumber, self.gameScore)
             self.plotter.updatePlot(self, self.agent)
             self.plotter.clearOutput()
             gc.collect()
@@ -111,7 +109,8 @@ class GameProcessor(object):
             self.agent.learn()
             self.gameState = self.newGameState
             self.plotter.printScores(self.gameNumber, self.frameCount, self.gameScore, self.info, avgScore,
-                                     self.agent.decisionFactor, self.numberOfGamesToPlay, self.agent.getModelSummary())
+                                     self.agent.decisionFactor, self.numberOfGamesToPlay, self.agent.getModelSummary(),
+                                     self.agent.accuracy, self.agent.loss)
 
     def __playFrame(self):
         action = self.agent.chooseAction(self.gameState)

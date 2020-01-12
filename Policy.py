@@ -25,7 +25,7 @@ class QNetBuilder(object):
             fullyConnectedLayers = self.__buildFullyConnectedLayers(inputs)
         outputs = Dense(numberOfActions, name="Output_Layer")(fullyConnectedLayers)
         model = Model(inputs=inputs, outputs=outputs, name="Deep Q-Learning CNN Model")
-        model.compile(optimizer=Adam(lr=learningRate), loss="logcosh")
+        model.compile(optimizer=Adam(lr=learningRate), loss="logcosh", metrics=["acc"])
         return model
 
     @staticmethod

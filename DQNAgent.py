@@ -7,7 +7,7 @@ class DDQNAgent(object):
     __slots__ = ["actionSpace", "numberOfActions", "discountFactor", "decisionFactor", "decisionFactorDecayRate",
                  "decisionFactorMinimum", "batchSize", "modelName", "updateTargetModelFrequency", "memory",
                  "trainingQNetModel", "targetQNetModel", "scoreHistory", "decisionFactorHistory", "avgScoreHistory",
-                 "learningFrequency"]
+                 "actionCount", "learningFrequency", "loss", "accuracy", "lossHistory", "accuracyHistory"]
 
     def __init__(self, learningRate, discountFactor, numberOfActions, decisionFactor, batchSize,
                  inputDimensions, decisionFactorDecayRate=0.996, decisionFactorMinimum=0.01,
@@ -29,6 +29,11 @@ class DDQNAgent(object):
         self.decisionFactorHistory = np.array([1])
         self.avgScoreHistory = np.array([0])
         self.learningFrequency = learningFrequency
+        self.actionCount = 0
+        self.lossHistory = np.array([])
+        self.accuracyHistory = np.array([])
+        self.loss = 0
+        self.accuracy = 0
 
     def remember(self, state, action, reward, new_state, done):
         self.memory.storeTransition(state, action, reward, new_state, done)
@@ -41,11 +46,11 @@ class DDQNAgent(object):
             state = state[np.newaxis, :]
             actions = self.trainingQNetModel.predict(state)
             action = np.argmax(actions)
-        self.learningFrequency += 1
+        self.actionCount += 1
         return action
 
     def learn(self):
-        if self.learningFrequency % 4 != 0:
+        if self.actionCount % self.learningFrequency != 0:
             return
         version = 2
         if self.memory.memorySlotCounter > self.batchSize:
@@ -67,22 +72,32 @@ class DDQNAgent(object):
                 targetPredictCurrentAction[batchIndex, action_indices] = reward + \
                     self.discountFactor * targetPredictNextAction[batchIndex, bestAction.astype(int)] * done
 
-                _ = self.trainingQNetModel.fit(state, targetPredictCurrentAction, verbose=0)
+                fit = self.trainingQNetModel.fit(state, targetPredictCurrentAction, verbose=0)
             else:
                 QValuesForActionsOnFutureStates = self.targetQNetModel.predict(newState)
-                QValuesForActionsOnFutureStates[done] = 0
                 maximumFutureQValue = np.max(QValuesForActionsOnFutureStates, axis=1)
-
-                TargetModelQValue = reward + self.discountFactor * maximumFutureQValue
-                _ = self.trainingQNetModel.fit(
+                TargetModelQValue = reward + self.discountFactor * (maximumFutureQValue * done)
+                fit = self.trainingQNetModel.fit(
                     state, action * TargetModelQValue[:, None],
                     epochs=1, batch_size=self.batchSize, verbose=0
                 )
+            self.loss = fit.history["loss"][0]
+            try:
+                self.accuracy = fit.history["acc"][0] * 100
+            except KeyError:
+                self.accuracy = 0
 
             self.__updateDecisionFactor()
 
             if self.memory.memorySlotCounter % self.updateTargetModelFrequency == 0:
                 self.__updateNetworkParameters()
+
+    def appendStats(self, gameNumber, gameScore):
+        self.scoreHistory = np.append(self.scoreHistory, gameScore)
+        avgScore = np.mean(self.scoreHistory[max(0, gameNumber - 100):(gameNumber + 1)])
+        self.avgScoreHistory = np.append(self.avgScoreHistory, avgScore)
+        self.lossHistory = np.append(self.avgScoreHistory, avgScore)
+        self.accuracyHistory = np.append(self.avgScoreHistory, avgScore)
 
     def __updateDecisionFactor(self):
         self.decisionFactor = self.decisionFactor * self.decisionFactorDecayRate if self.decisionFactor > \
