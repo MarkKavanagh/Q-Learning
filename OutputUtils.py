@@ -70,7 +70,7 @@ class OutputUtils(object):
         lines.append(" Average Score: {avg:{n}.2f}{padding} Decision Factor: {df:.3f}"
                      .format(avg=avgScore, n=maxRawLength, padding=padding, df=decisionFactor))
         padding = int(max(maxLength - maxRawLength - len('Model Accuracy: '), 0)) * ' '
-        lines.append("Model Accuracy: {acc:{n}.2f}{padding} Model Loss: {ml:.5f}"
+        lines.append("Model Accuracy: {acc:{n}.2f}{padding} Model Loss: {ml:.3E}"
                      .format(acc=accuracy, n=maxRawLength, padding=padding, ml=loss))
         lines.append("")
         lines.append("Process Memory: {memory:.3f} GB"
@@ -116,7 +116,8 @@ class OutputUtils(object):
         plt.subplot(2, 3, 3)
         plt.cla()
         plt.title("Model Loss Progression")
-        plt.plot([x for x in range(len(agent.lossHistory))], agent.lossHistory, 'b')
+        normalizedLoss = agent.lossHistory / np.sqrt(np.sum(agent.lossHistory**2))
+        plt.plot([x for x in range(len(agent.lossHistory))], normalizedLoss, 'b')
         plt.subplot(2, 3, 4)
         plt.cla()
         plt.title('Game Score Progression')

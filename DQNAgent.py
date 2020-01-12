@@ -96,8 +96,8 @@ class DDQNAgent(object):
         self.scoreHistory = np.append(self.scoreHistory, gameScore)
         avgScore = np.mean(self.scoreHistory[max(0, gameNumber - 100):(gameNumber + 1)])
         self.avgScoreHistory = np.append(self.avgScoreHistory, avgScore)
-        self.lossHistory = np.append(self.avgScoreHistory, avgScore)
-        self.accuracyHistory = np.append(self.avgScoreHistory, avgScore)
+        self.lossHistory = np.append(self.lossHistory, self.loss)
+        self.accuracyHistory = np.append(self.accuracyHistory, self.accuracy)
 
     def __updateDecisionFactor(self):
         self.decisionFactor = self.decisionFactor * self.decisionFactorDecayRate if self.decisionFactor > \
