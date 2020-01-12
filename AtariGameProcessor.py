@@ -12,7 +12,7 @@ class GameProcessor(object):
                  "newGameFrame", "reward", "info", "endState", "gameState", "newGameState",
                  "agent", "plotter"]
 
-    def __init__(self, gameSelection, numberOfGamesToPlay, showVideo=False):
+    def __init__(self, gameSelection, numberOfGamesToPlay, showVideo = False):
         self.numberOfGamesToPlay = numberOfGamesToPlay
         self.showVideo = showVideo
         self.agent = None
@@ -58,7 +58,6 @@ class GameProcessor(object):
 
     @staticmethod
     def __selectGameFromLibrary(gameSelection):
-        print('selecting game', end="                            \r")
         gameLibrary = {1: 'LunarLander-v2', 2: 'Breakout-v0'}
         videoLibrary = {1: './lunar-lander-ddqn-2', 2: './breakout-ddqn-0'}
         modelLibrary = {1: './lunar-lander-ddqn_model.h5', 2: './breakout-ddqn_model.h5'}
@@ -68,10 +67,10 @@ class GameProcessor(object):
         return gameName, videoName, modelName
 
     def __initializeGame(self):
-        print("loading game", end="                            \r")
         theGame = gym.make(self.gameName).env
         if self.showVideo:
-            theGame = wrappers.Monitor(self.theGame, self.videoName, video_callable=lambda episode_id: True, force=True)
+            theGame = wrappers.Monitor(self.theGame, self.videoName,
+                                       video_callable = lambda episode_id: True, force = True)
         return theGame
 
     def resetGame(self):
@@ -81,16 +80,15 @@ class GameProcessor(object):
         self.gameFrame = self.theGame.reset()
         self.gameFrame = self.__rgb2gray(self.gameFrame)
         try:
-            self.gameState = np.stack([self.gameFrame] * 4, axis=2).astype(np.uint8)
+            self.gameState = np.stack([self.gameFrame] * 4, axis = 2).astype(np.uint8)
         except np.AxisError:
-            self.gameState = np.stack([self.gameFrame] * 4, axis=1).astype(np.uint8)
+            self.gameState = np.stack([self.gameFrame] * 4, axis = 1).astype(np.uint8)
 
     def playGames(self):
         gc.enable()
-        avgScore = 0
         for gameNumber in range(self.numberOfGamesToPlay):
             self.resetGame()
-            self.playOneGame(avgScore)
+            self.playOneGame()
             self.agent.decisionFactorHistory = np.append(self.agent.decisionFactorHistory, self.agent.decisionFactor)
             self.agent.appendStats(gameNumber, self.gameScore)
             self.plotter.updatePlot(self, self.agent)
@@ -99,7 +97,7 @@ class GameProcessor(object):
             if gameNumber % 1000 == 0:
                 self.agent.saveModel()
 
-    def playOneGame(self, avgScore):
+    def playOneGame(self):
         self.endState = None
         self.gameNumber += 1
         while not self.isDone:
@@ -108,8 +106,9 @@ class GameProcessor(object):
             self.agent.remember(self.gameState, action, self.reward, self.newGameState, int(self.isDone))
             self.agent.learn()
             self.gameState = self.newGameState
-            self.plotter.printScores(self.gameNumber, self.frameCount, self.gameScore, self.info, avgScore,
-                                     self.agent.decisionFactor, self.numberOfGamesToPlay, self.agent.getModelSummary(),
+            self.plotter.printScores(self.gameNumber, self.frameCount, self.gameScore, self.info,
+                                     self.agent.avgScoreHistory[-1], self.agent.decisionFactor,
+                                     self.numberOfGamesToPlay, self.agent.getModelSummary(),
                                      self.agent.accuracy, self.agent.loss)
 
     def __playFrame(self):
@@ -124,12 +123,12 @@ class GameProcessor(object):
             self.endState = self.newGameFrame
         self.newGameFrame = self.__rgb2gray(self.newGameFrame)
         self.newGameState = np.append(self.gameState[:, :, 1:],
-                                      np.expand_dims(self.newGameFrame + 2, 2), axis=2).astype(np.uint8)
+                                      np.expand_dims(self.newGameFrame + 2, 2), axis = 2).astype(np.uint8)
 
     @staticmethod
     def __rgb2gray(rgb):
         if len(rgb.shape) == 1:
             return rgb
-        rgb = cv2.resize(rgb, dsize=(80, 105), interpolation=cv2.INTER_AREA)
+        rgb = cv2.resize(rgb, dsize = (80, 105), interpolation = cv2.INTER_AREA)
         rgb = np.dot(rgb[..., :3], [0.2989, 0.5870, 0.1140]).astype(np.uint8)
         return rgb

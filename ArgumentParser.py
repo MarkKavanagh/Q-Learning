@@ -7,8 +7,8 @@ class ArgumentParser(object):
                  "batchSize", "gameNumberForLibrary", "updateTargetModelFrequency", "parser", "learningFrequency"]
 
     def __init__(self):
-        self.parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
-                                              description="""
+        self.parser = argparse.ArgumentParser(formatter_class = argparse.RawTextHelpFormatter,
+                                              description = """
 Q-Learning Algorithm
 ----------------------------------------------------------------------------------------------------------------------
 | Program for applying Q-Learning to Atari games from OpenAI's gym environments (or any custom game with the         |
@@ -51,51 +51,51 @@ Q-Learning Algorithm
         self.__parseArguments()
 
     def __addArguments(self):
-        self.parser.add_argument("-n", "--notebook", type=bool,
-                                 help="[boolean] Use notebook display (default: {nb})"
-                                 .format(nb=self.isNotebook))
-        self.parser.add_argument("-p", "--maxpooling", type=bool,
-                                 help="[boolean]Use max pooling layer in CNN (default: {mp})"
-                                 .format(mp=self.useMaxPooling))
-        self.parser.add_argument("-l", "--load", type=bool,
-                                 help="[boolean] Load previous Q-Net model (default: {l})"
-                                 .format(l=self.loadPreviousModel))
-        self.parser.add_argument("-r", "--render", type=bool,
-                                 help="[boolean] Render gameplay (default: {r})"
-                                 .format(r=self.showVideo))
-        self.parser.add_argument("-g", "--games", type=int,
-                                 help="[int] Number of games to play before exit (default: {g})"
-                                 .format(g=self.numberOfGamesToPlay))
-        self.parser.add_argument("-m", "--buffersize", type=int,
-                                 help="[int] Number of replay experiences stored in buffer(default: {b})"
-                                 .format(b=self.memorySlots))
-        self.parser.add_argument("-a", "--learningrate", type=float,
-                                 help="[float] Learning rate of Q-Net model (default: {r})"
-                                 .format(r=self.learningRate))
-        self.parser.add_argument("-d", "--decisionstart", type=float,
-                                 help="[float] Starting decision factor for Agent (default: {d})"
-                                 .format(d=self.decisionFactor))
-        self.parser.add_argument("-y", "--decisiondecay", type=float,
-                                 help="[float] Rate of decay for the Agent's decision factor (default: {r})"
-                                 .format(r=self.decisionFactorDecayRate))
-        self.parser.add_argument("-f", "--decisionfinal", type=float,
-                                 help="[float] Final value of the Agent's decision factor (default: {f})"
-                                 .format(f=self.decisionFactorMinimum))
-        self.parser.add_argument("-c", "--discount", type=float,
-                                 help="[float] The Agent's discount factor on future rewards (default: {d})"
-                                 .format(d=self.discountFactor))
-        self.parser.add_argument("-b", "--batch", type=int,
-                                 help="[int] Batch size for choosing replay experiences for learning (default: {b})"
-                                 .format(b=self.batchSize))
-        self.parser.add_argument("-s", "--selection", type=int,
-                                 help="[int] Game to play from library (default: {s})"
-                                 .format(s=self.gameNumberForLibrary))
-        self.parser.add_argument("-u", "--update", type=int,
-                                 help="[int] how often to update the Agent's target model (default: {u})"
-                                 .format(u=self.updateTargetModelFrequency))
-        self.parser.add_argument("-t", "--learningFrequency", type=int,
-                                 help="[int] how often to train the Agent's training model (default: {f})"
-                                 .format(f=self.learningFrequency))
+        self.parser.add_argument("-n", "--notebook", type = bool,
+                                 help = "[boolean] Use notebook display (default: {nb})"
+                                 .format(nb = self.isNotebook))
+        self.parser.add_argument("-p", "--maxpooling", type = bool,
+                                 help = "[boolean]Use max pooling layer in CNN (default: {mp})"
+                                 .format(mp = self.useMaxPooling))
+        self.parser.add_argument("-l", "--load", type = bool,
+                                 help = "[boolean] Load previous Q-Net model (default: {l})"
+                                 .format(l = self.loadPreviousModel))
+        self.parser.add_argument("-r", "--render", type = bool,
+                                 help = "[boolean] Render gameplay (default: {r})"
+                                 .format(r = self.showVideo))
+        self.parser.add_argument("-g", "--games", type = int,
+                                 help = "[int] Number of games to play before exit (default: {g})"
+                                 .format(g = self.numberOfGamesToPlay))
+        self.parser.add_argument("-m", "--buffersize", type = int,
+                                 help = "[int] Number of replay experiences stored in buffer(default: {b})"
+                                 .format(b = self.memorySlots))
+        self.parser.add_argument("-a", "--learningrate", type = float,
+                                 help = "[float] Learning rate of Q-Net model (default: {r})"
+                                 .format(r = self.learningRate))
+        self.parser.add_argument("-d", "--decisionstart", type = float,
+                                 help = "[float] Starting decision factor for Agent (default: {d})"
+                                 .format(d = self.decisionFactor))
+        self.parser.add_argument("-y", "--decisiondecay", type = float,
+                                 help = "[float] Rate of decay for the Agent's decision factor (default: {r})"
+                                 .format(r = self.decisionFactorDecayRate))
+        self.parser.add_argument("-f", "--decisionfinal", type = float,
+                                 help = "[float] Final value of the Agent's decision factor (default: {f})"
+                                 .format(f = self.decisionFactorMinimum))
+        self.parser.add_argument("-c", "--discount", type = float,
+                                 help = "[float] The Agent's discount factor on future rewards (default: {d})"
+                                 .format(d = self.discountFactor))
+        self.parser.add_argument("-b", "--batch", type = int,
+                                 help = "[int] Batch size for choosing replay experiences for learning (default: {b})"
+                                 .format(b = self.batchSize))
+        self.parser.add_argument("-s", "--selection", type = int,
+                                 help = "[int] Game to play from library (default: {s})"
+                                 .format(s = self.gameNumberForLibrary))
+        self.parser.add_argument("-u", "--update", type = int,
+                                 help = "[int] how often to update the Agent's target model (default: {u})"
+                                 .format(u = self.updateTargetModelFrequency))
+        self.parser.add_argument("-t", "--learningFrequency", type = int,
+                                 help = "[int] how often to train the Agent's training model (default: {f})"
+                                 .format(f = self.learningFrequency))
 
     def __parseArguments(self):
         args = self.parser.parse_args()

@@ -4,7 +4,7 @@ from AtariGameProcessor import GameProcessor
 
 class TestGameProcessor(TestCase):
     def setUp(self):
-        self.processor = GameProcessor(gameSelection=2, numberOfGamesToPlay=10, showVideo=False)
+        self.processor = GameProcessor(gameSelection = 2, numberOfGamesToPlay = 10, showVideo = False)
 
     def test_select_new_game_to_play(self):
         self.processor.selectNewGameToPlay(1)
@@ -30,5 +30,5 @@ class TestGameProcessor(TestCase):
 
     def test_play_one_game(self):
         self.processor.isDone = True
-        self.processor.playOneGame(0)
+        self.processor.playOneGame()
         self.assertEqual(self.processor.gameNumber, 1)

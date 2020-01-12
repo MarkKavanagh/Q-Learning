@@ -5,16 +5,16 @@ class ReplayBuffer(object):
     __slots__ = ["memorySlots", "memorySlotCounter", "discreteActions", "stateMemory", "outcomeStateMemory",
                  "actionMemory", "rewardMemory", "isDoneMemory"]
 
-    def __init__(self, memorySlots, inputShape, numberOfActions, discreteActions=True):
+    def __init__(self, memorySlots, inputShape, numberOfActions, discreteActions = True):
         self.memorySlots = memorySlots
         self.memorySlotCounter = 0
         self.discreteActions = discreteActions
-        self.stateMemory = np.zeros((self.memorySlots, *inputShape), dtype=np.uint8)
-        self.outcomeStateMemory = np.zeros((self.memorySlots, *inputShape), dtype=np.uint8)
+        self.stateMemory = np.zeros((self.memorySlots, *inputShape), dtype = np.uint8)
+        self.outcomeStateMemory = np.zeros((self.memorySlots, *inputShape), dtype = np.uint8)
         dTypeForActionMemory = np.int8 if self.discreteActions else np.float32
-        self.actionMemory = np.zeros((self.memorySlots, numberOfActions), dtype=dTypeForActionMemory)
-        self.rewardMemory = np.zeros(self.memorySlots, dtype=np.int8)
-        self.isDoneMemory = np.zeros(self.memorySlots, dtype=np.uint8)
+        self.actionMemory = np.zeros((self.memorySlots, numberOfActions), dtype = dTypeForActionMemory)
+        self.rewardMemory = np.zeros(self.memorySlots, dtype = np.int8)
+        self.isDoneMemory = np.zeros(self.memorySlots, dtype = np.uint8)
 
     def storeTransition(self, state, action, reward, outcomeState, isDone):
         index = self.memorySlotCounter % self.memorySlots

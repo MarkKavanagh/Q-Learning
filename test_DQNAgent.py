@@ -9,13 +9,11 @@ class TestDDQNAgent(TestCase):
         self.inputDimensions = (84, 84, 4)
         self.memorySlots = 100
         self.numberOfActions = 4
-        self.agent = DDQNAgent(memorySlots=self.memorySlots, decisionFactor=1.0,
-                               batchSize=64,
-                               inputDimensions=self.inputDimensions, modelName="modelName", useMaxPooling=False,
-                               decisionFactorDecayRate=0.99996, numberOfActions=self.numberOfActions,
-                               decisionFactorMinimum=0.1, discountFactor=0.99,
-                               updateTargetModelFrequency=1,
-                               learningRate=0.0001)
+        self.agent = DDQNAgent(memorySlots = self.memorySlots, decisionFactor = 1.0,
+                               batchSize = 64, updateTargetModelFrequency = 1,
+                               inputDimensions = self.inputDimensions, modelName = "modelName", useMaxPooling = False,
+                               decisionFactorDecayRate = 0.99996, numberOfActions = self.numberOfActions,
+                               decisionFactorMinimum = 0.1, discountFactor = 0.99, learningRate = 0.0001)
 
     def test_chooseAction(self):
         self.randomizeReplayBuffer(self.agent, self.inputDimensions, self.memorySlots, self.numberOfActions)

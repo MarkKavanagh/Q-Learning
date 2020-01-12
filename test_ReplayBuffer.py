@@ -29,10 +29,10 @@ class TestReplayBuffer(TestCase):
     def test_storeTransition(self):
         buffer = ReplayBuffer(self.memorySlots, self.inputShape, self.numberOfActions)
         for i in range(2 * self.memorySlots):
-            state = np.random.randint(100, size=self.inputShape)
-            action = np.random.randint(self.numberOfActions, size=self.numberOfActions)
+            state = np.random.randint(100, size = self.inputShape)
+            action = np.random.randint(self.numberOfActions, size = self.numberOfActions)
             reward = np.random.randint(100)
-            outcomeState = np.random.randint(100, size=self.inputShape)
+            outcomeState = np.random.randint(100, size = self.inputShape)
             isDone = np.random.randint(2)
             buffer.storeTransition(state, action, reward, outcomeState, isDone)
         self.assertEqual(buffer.stateMemory.shape, (self.memorySlots, *self.inputShape))
@@ -47,10 +47,10 @@ class TestReplayBuffer(TestCase):
         numberOfActions = 4
         buffer = ReplayBuffer(memorySlots, inputShape, numberOfActions)
         for i in range(memorySlots):
-            state = np.random.randint(100, size=inputShape)
-            action = np.random.randint(numberOfActions, size=numberOfActions)
+            state = np.random.randint(100, size = inputShape)
+            action = np.random.randint(numberOfActions, size = numberOfActions)
             reward = np.random.randint(100)
-            outcomeState = np.random.randint(100, size=inputShape)
+            outcomeState = np.random.randint(100, size = inputShape)
             isDone = 0
             buffer.storeTransition(state, action, reward, outcomeState, isDone)
 

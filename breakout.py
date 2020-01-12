@@ -4,12 +4,12 @@ from ArgumentParser import ArgumentParser
 
 
 def createAgent(parser, inputDimensions, numberOfActions, modelName):
-    agent = DDQNAgent(memorySlots=parser.memorySlots, decisionFactor=parser.decisionFactor, batchSize=parser.batchSize,
-                      inputDimensions=inputDimensions, modelName=modelName, useMaxPooling=parser.useMaxPooling,
-                      decisionFactorDecayRate=parser.decisionFactorDecayRate, numberOfActions=numberOfActions,
-                      decisionFactorMinimum=parser.decisionFactorMinimum, discountFactor=parser.discountFactor,
-                      updateTargetModelFrequency=parser.updateTargetModelFrequency, learningRate=parser.learningRate,
-                      learningFrequency=parser.learningFrequency)
+    agent = DDQNAgent(memorySlots = parser.memorySlots, decisionFactor = parser.decisionFactor,
+                      batchSize = parser.batchSize, inputDimensions = inputDimensions, modelName = modelName,
+                      useMaxPooling = parser.useMaxPooling, decisionFactorDecayRate = parser.decisionFactorDecayRate,
+                      numberOfActions = numberOfActions, decisionFactorMinimum = parser.decisionFactorMinimum,
+                      discountFactor = parser.discountFactor, learningFrequency=parser.learningFrequency,
+                      updateTargetModelFrequency=parser.updateTargetModelFrequency, learningRate=parser.learningRate)
     if parser.loadPreviousModel:
         agent.loadModel()
     return agent
