@@ -30,7 +30,7 @@ class OutputUtils(object):
 
     def printScores(self, episodeId, frameCount, gameScore, info, avgScore,
                     decisionFactor, numberOfEpisodes, modelSummary, accuracy, loss):
-        maxRawLength, maxLength = self.__getMaxLengths(numberOfEpisodes, gameScore, avgScore, accuracy)
+        maxRawLength, maxLength = self.__getMaxLengths(numberOfEpisodes, gameScore, avgScore)
         lines = self.__formatOutput(maxLength, maxRawLength, episodeId, gameScore, avgScore,
                                     frameCount, info, decisionFactor, modelSummary, accuracy, loss, self.process)
         if not self.isNotebook:
@@ -43,11 +43,11 @@ class OutputUtils(object):
             clear_output(wait = True)
 
     @staticmethod
-    def __getMaxLengths(numberOfEpisodes, gameScore, avgScore, accuracy):
+    def __getMaxLengths(numberOfEpisodes, gameScore, avgScore):
         episodeLength = int(np.floor(np.log10(numberOfEpisodes)) + 1)
         scoreLength = int(np.floor(max(np.log10(max(abs(gameScore), 0.01)), 0)) + 1)
         avgScoreLength = int(np.floor(max(np.log10(max(abs(avgScore), 0.01)), 0)) + 4)
-        accuracyLength = int(np.floor(max(np.log10(max(abs(accuracy), 0.01)), 0)) + 4)
+        accuracyLength = 6
         maxRawLength = max(episodeLength, scoreLength, avgScoreLength, accuracyLength)
         maxLength = max(episodeLength + len('       Episode: '),
                         scoreLength + len(' Current Score: '),
@@ -117,6 +117,8 @@ class OutputUtils(object):
         plt.cla()
         plt.title("Model Loss Progression")
         plt.semilogy([x for x in range(len(agent.lossHistory))], agent.lossHistory, 'b')
+        plt.semilogy([x for x in range(len(agent.avgLossHistory))], agent.avgLossHistory, 'k')
+        plt.legend(('Loss', 'Trendline'), loc = 'best')
         plt.subplot(2, 3, 4)
         plt.cla()
         plt.title('Game Score Progression')
@@ -131,6 +133,8 @@ class OutputUtils(object):
         plt.cla()
         plt.title("Model Accuracy Progression")
         plt.plot([x for x in range(len(agent.accuracyHistory))], agent.accuracyHistory, 'b')
+        plt.plot([x for x in range(len(agent.avgAccuracyHistory))], agent.avgAccuracyHistory, 'k')
+        plt.legend(('Accuracy', 'Trendline'), loc = 'best')
         try:
             plt.savefig('./thePlot.jpg', dpi = None, facecolor = 'w', edgecolor = 'w',
                         orientation = 'portrait', papertype = None, format = None,

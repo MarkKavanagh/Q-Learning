@@ -1,7 +1,7 @@
 from unittest import TestCase
 from Policy import QNetBuilder
 import numpy as np
-from keras.optimizers import Adam
+from keras.optimizers import Adam, RMSprop
 
 
 class TestQNetBuilder(TestCase):
@@ -15,7 +15,10 @@ class TestQNetBuilder(TestCase):
         self.assertEqual(net.name, "Deep Q-Learning CNN Model")
         self.assertEqual(net.input_shape, (None, *inputDimensions))
         self.assertEqual(len(net.layers), 8)
-        self.assertEqual(net.loss_functions[0].name, "logcosh")
+        self.assertEqual(net.loss_functions[0].name, "mean_squared_error")
         self.assertEqual(net.loss_functions[0].reduction, "sum_over_batch_size")
         self.assertEqual(net.optimizer.__class__, Adam)
         self.assertEqual(len(action[0]), numberOfActions)
+
+        net = QNetBuilder(learningRate, numberOfActions, inputDimensions, False, 2).getModel()
+        self.assertEqual(net.optimizer.__class__, RMSprop)

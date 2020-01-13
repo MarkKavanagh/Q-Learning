@@ -4,32 +4,36 @@ from keras.optimizers import Adam, RMSprop
 
 
 class QNetBuilder(object):
-    __slots__ = ["model"]
+    __slots__ = ["model", "version", "learningRate", "numberOfActions", "inputDimensions", "useMaxPooling"]
 
-    def __init__(self, learningRate, numberOfActions, inputDimensions, useMaxPooling = False):
-        self.model = self.__buildNeuralNet(learningRate, numberOfActions, inputDimensions, useMaxPooling)
+    def __init__(self, learningRate, numberOfActions, inputDimensions, useMaxPooling = False, version = 1):
+        self.version = version
+        self.learningRate = learningRate
+        self.numberOfActions = numberOfActions
+        self.inputDimensions = inputDimensions
+        self.useMaxPooling = useMaxPooling
 
     def getModel(self):
-        return self.model
+        model = self.__buildNeuralNet()
+        return model
 
     @staticmethod
     def loadModel(modelName):
         return load_model(modelName)
 
-    def __buildNeuralNet(self, learningRate, numberOfActions, inputDimensions, useMaxPooling):
-        version = 1
-        inputs = Input(shape = inputDimensions, name = "Input_Layer")
-        if len(inputDimensions) > 1:
-            cnnLayers = self.__buildCnnLayers(inputs, useMaxPooling)
+    def __buildNeuralNet(self):
+        inputs = Input(shape = self.inputDimensions, name = "Input_Layer")
+        if len(self.inputDimensions) > 1:
+            cnnLayers = self.__buildCnnLayers(inputs, self.useMaxPooling)
             fullyConnectedLayers = self.__buildFullyConnectedLayers(cnnLayers)
         else:
             fullyConnectedLayers = self.__buildFullyConnectedLayers(inputs)
-        outputs = Dense(numberOfActions, name="Output_Layer")(fullyConnectedLayers)
+        outputs = Dense(self.numberOfActions, name="Output_Layer")(fullyConnectedLayers)
         model = Model(inputs = inputs, outputs = outputs, name = "Deep Q-Learning CNN Model")
-        if version == 1:
-            optimizer = Adam(lr = learningRate)
+        if self.version == 1:
+            optimizer = Adam(lr = self.learningRate)
         else:
-            optimizer = RMSprop(lr = learningRate, rho = 0.95, epsilon = 0.01)
+            optimizer = RMSprop(lr = self.learningRate, rho = 0.95, epsilon = 0.01)
         model.compile(optimizer = optimizer, loss = "mean_squared_error", metrics = ["acc"])
         return model
 
