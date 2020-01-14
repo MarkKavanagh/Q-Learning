@@ -28,6 +28,9 @@ class TestDDQNAgent(TestCase):
             self.agent.learn()
             print(self.agent.accuracy)
 
+    def test_updateParameters(self):
+        self.agent.targetQNetModel.set_weights(self.agent.trainingQNetModel.get_weights())
+
     @staticmethod
     def randomizeReplayBuffer(agent, inputDimensions, memorySlots, numberOfActions):
         agent.memory.memorySlotCounter = memorySlots

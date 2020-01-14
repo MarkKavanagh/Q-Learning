@@ -26,7 +26,8 @@ class DDQNAgent(object):
         self.memory = ReplayBuffer(memorySlots, inputDimensions, numberOfActions, discreteActions = True)
         self.trainingQNetModel = QNetBuilder(learningRate, numberOfActions,
                                              inputDimensions, useMaxPooling, 2).getModel()
-        self.targetQNetModel = QNetBuilder(learningRate, numberOfActions, inputDimensions, useMaxPooling, 2).getModel()
+        self.targetQNetModel = QNetBuilder(learningRate, numberOfActions,
+                                           inputDimensions, useMaxPooling, 2).getModel()
         self.scoreHistory = np.array([0])
         self.decisionFactorHistory = np.array([1])
         self.avgScoreHistory = np.array([0])
@@ -56,7 +57,7 @@ class DDQNAgent(object):
     def learn(self):
         if self.actionCount % self.learningFrequency != 0:
             return
-        version = 3
+        version = 1
         if self.memory.memorySlotCounter > self.batchSize:
             state, action, reward, newState, done = self.memory.sampleBuffer(self.batchSize)
             if version == 1:
