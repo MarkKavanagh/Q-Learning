@@ -4,12 +4,21 @@ from ArgumentParser import ArgumentParser
 
 
 def createAgent(parser, inputDimensions, numberOfActions, modelName):
-    agent = DDQNAgent(memorySlots = parser.memorySlots, decisionFactor = parser.decisionFactor,
-                      batchSize = parser.batchSize, inputDimensions = inputDimensions, modelName = modelName,
-                      useMaxPooling = parser.useMaxPooling, decisionFactorDecayRate = parser.decisionFactorDecayRate,
-                      numberOfActions = numberOfActions, decisionFactorMinimum = parser.decisionFactorMinimum,
-                      discountFactor = parser.discountFactor, learningFrequency=parser.learningFrequency,
-                      updateTargetModelFrequency=parser.updateTargetModelFrequency, learningRate=parser.learningRate)
+    agent = DDQNAgent.Builder() \
+        .setMemorySlots(parser.memorySlots) \
+        .setInputDimensions(inputDimensions) \
+        .setNumberOfActions(numberOfActions) \
+        .setDecisionFactor(parser.decisionFactor) \
+        .setDecisionFactorDecayRate(parser.decisionFactorDecayRate) \
+        .setDecisionFactorMinimum(parser.decisionFactorMinimum) \
+        .setDiscountFactor(parser.discountFactor) \
+        .setModelName(modelName) \
+        .setUseMaxPooling(parser.useMaxPooling) \
+        .setUpdateTargetModelFrequency(parser.updateTargetModelFrequency) \
+        .setLearningRate(parser.learningRate) \
+        .setLearningFrequency(parser.learningFrequency) \
+        .setBatchSize(parser.batchSize) \
+        .build()
     if parser.loadPreviousModel:
         agent.loadModel()
     return agent

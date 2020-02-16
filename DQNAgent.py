@@ -11,10 +11,9 @@ class DDQNAgent(object):
                  "avgLossHistory", "avgAccuracyHistory"]
 
     def __init__(self, learningRate, discountFactor, numberOfActions, decisionFactor, batchSize,
-                 inputDimensions, decisionFactorDecayRate=0.996, decisionFactorMinimum=0.01,
-                 memorySlots=1000000, modelName='ddqn_model.h5', updateTargetModelFrequency=100,
-                 learningFrequency=1, useMaxPooling = False):
-        self.actionSpace = np.arange(numberOfActions, dtype = np.uint8)
+                 inputDimensions, decisionFactorDecayRate = 0.996, decisionFactorMinimum = 0.01,
+                 memorySlots = 1000000, modelName = 'ddqn_model.h5', updateTargetModelFrequency = 100,
+                 learningFrequency = 1, useMaxPooling = False):
         self.numberOfActions = numberOfActions
         self.discountFactor = discountFactor
         self.decisionFactor = decisionFactor
@@ -23,8 +22,10 @@ class DDQNAgent(object):
         self.batchSize = batchSize
         self.modelName = modelName
         self.updateTargetModelFrequency = updateTargetModelFrequency
+
+        self.actionSpace = np.arange(numberOfActions, dtype = np.uint8)
         self.memory = ReplayBuffer(memorySlots, inputDimensions, numberOfActions, discreteActions = True)
-        self.trainingQNetModel = QNet.Builder().useRmsPropOptimizer(learningRate)\
+        self.trainingQNetModel = QNet.Builder().useRmsPropOptimizer(learningRate) \
             .setNumberOfActions(numberOfActions) \
             .setInputDimensions(inputDimensions) \
             .setUseMaxPooling(useMaxPooling) \
@@ -105,7 +106,7 @@ class DDQNAgent(object):
 
     def __updateDecisionFactor(self):
         self.decisionFactor = self.decisionFactor * self.decisionFactorDecayRate if self.decisionFactor > \
-            self.decisionFactorMinimum else self.decisionFactorMinimum
+                                                                                    self.decisionFactorMinimum else self.decisionFactorMinimum
 
     def __updateNetworkParameters(self):
         if self.updateTargetModelFrequency == 1:
@@ -126,7 +127,7 @@ class DDQNAgent(object):
 
     def getModelSummary(self):
         modelSummary = []
-        self.trainingQNetModel.summary(print_fn=lambda x: modelSummary.append(x))
+        self.trainingQNetModel.summary(print_fn = lambda x: modelSummary.append(x))
         return "\n".join(modelSummary)
 
     def appendStats(self, gameNumber, gameScore):
@@ -139,3 +140,81 @@ class DDQNAgent(object):
         self.accuracyHistory = np.append(self.accuracyHistory, self.accuracy)
         avgAcc = np.mean(self.accuracyHistory[max(0, gameNumber - 100):(gameNumber + 1)])
         self.avgAccuracyHistory = np.append(self.avgAccuracyHistory, avgAcc)
+
+    class Builder:
+        def __init__(self):
+            self.memorySlots = 1000000
+            self.inputDimensions = None
+            self.useMaxPooling = False
+            self.learningRate = None
+            self.learningFrequency = 1
+            self.numberOfActions = None
+            self.discountFactor = None
+            self.decisionFactor = 1.0
+            self.decisionFactorDecayRate = 0.996
+            self.decisionFactorMinimum = 0.01
+            self.batchSize = None
+            self.modelName = 'ddqn_model.h5'
+            self.updateTargetModelFrequency = 100
+
+        def setMemorySlots(self, memorySlots):
+            self.memorySlots = memorySlots
+            return self
+
+        def setInputDimensions(self, inputDimensions):
+            self.inputDimensions = inputDimensions
+            return self
+
+        def setUseMaxPooling(self, useMaxPooling):
+            self.useMaxPooling = useMaxPooling
+            return self
+
+        def setLearningRate(self, learningRate):
+            self.learningRate = learningRate
+            return self
+
+        def setLearningFrequency(self, learningFrequency):
+            self.learningFrequency = learningFrequency
+            return self
+
+        def setNumberOfActions(self, numberOfActions):
+            self.numberOfActions = numberOfActions
+            return self
+
+        def setDiscountFactor(self, discountFactor):
+            self.discountFactor = discountFactor
+            return self
+
+        def setDecisionFactor(self, decisionFactor):
+            self.decisionFactor = decisionFactor
+            return self
+
+        def setDecisionFactorDecayRate(self, decisionFactorDecayRate):
+            self.decisionFactorDecayRate = decisionFactorDecayRate
+            return self
+
+        def setDecisionFactorMinimum(self, decisionFactorMinimum):
+            self.decisionFactorMinimum = decisionFactorMinimum
+            return self
+
+        def setBatchSize(self, batchSize):
+            self.batchSize = batchSize
+            return self
+
+        def setModelName(self, modelName):
+            self.modelName = modelName
+            return self
+
+        def setUpdateTargetModelFrequency(self, updateTargetModelFrequency):
+            self.updateTargetModelFrequency = updateTargetModelFrequency
+            return self
+
+        def build(self):
+            return DDQNAgent(memorySlots = self.memorySlots, decisionFactor = self.decisionFactor,
+                             batchSize = self.batchSize, inputDimensions = self.inputDimensions,
+                             modelName = self.modelName,
+                             useMaxPooling = self.useMaxPooling, decisionFactorDecayRate = self.decisionFactorDecayRate,
+                             numberOfActions = self.numberOfActions, decisionFactorMinimum = self.decisionFactorMinimum,
+                             discountFactor = self.discountFactor, learningFrequency = self.learningFrequency,
+                             updateTargetModelFrequency = self.updateTargetModelFrequency,
+                             learningRate = self.learningRate)
