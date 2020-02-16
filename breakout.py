@@ -26,7 +26,11 @@ def createAgent(parser, inputDimensions, numberOfActions, modelName):
 
 def main():
     parser = ArgumentParser()
-    GP = GameProcessor(parser.gameNumberForLibrary, parser.numberOfGamesToPlay)
+    GP = GameProcessor.Builder()\
+        .setGameSelection(parser.gameNumberForLibrary)\
+        .setNumberOfGamesToPlay(parser.numberOfGamesToPlay)\
+        .setShowVideo(parser.showVideo)\
+        .build()
     GP.plotter.setIsNotebook(parser.isNotebook)
     inputDimensions = GP.gameState.shape
     numberOfActions = GP.theGame.action_space.n

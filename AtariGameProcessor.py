@@ -107,10 +107,10 @@ class GameProcessor(object):
             self.agent.learn()
             self.agent.update()
             self.gameState = self.newGameState
-            self.plotter.printScores(self.gameNumber, self.frameCount, self.gameScore, self.info,
-                                     self.agent.avgScoreHistory[-1], self.agent.decisionFactor,
-                                     self.numberOfGamesToPlay, self.agent.getModelSummary(),
-                                     self.agent.accuracy, self.agent.loss)
+            # self.plotter.printScores(self.gameNumber, self.frameCount, self.gameScore, self.info,
+            #                          self.agent.avgScoreHistory[-1], self.agent.decisionFactor,
+            #                          self.numberOfGamesToPlay, self.agent.getModelSummary(),
+            #                          self.agent.accuracy, self.agent.loss)
 
     def __playFrame(self):
         action = self.agent.chooseAction(self.gameState)
@@ -133,3 +133,24 @@ class GameProcessor(object):
         rgb = cv2.resize(rgb, dsize = (80, 105), interpolation = cv2.INTER_AREA)
         rgb = np.dot(rgb[..., :3], [0.2989, 0.5870, 0.1140]).astype(np.uint8)
         return rgb
+
+    class Builder:
+        def __init__(self):
+            self.gameSelection = None
+            self.numberOfGamesToPlay = None
+            self.showVideo = False
+
+        def setGameSelection(self, gameSelection):
+            self.gameSelection = gameSelection
+            return self
+
+        def setNumberOfGamesToPlay(self, numberOfGamesToPlay):
+            self.numberOfGamesToPlay = numberOfGamesToPlay
+            return self
+
+        def setShowVideo(self, showVideo):
+            self.showVideo = showVideo
+            return self
+
+        def build(self):
+            return GameProcessor(self.gameSelection, self.numberOfGamesToPlay, self.showVideo)

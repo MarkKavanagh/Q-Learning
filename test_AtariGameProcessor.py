@@ -4,7 +4,7 @@ from AtariGameProcessor import GameProcessor
 
 class TestGameProcessor(TestCase):
     def setUp(self):
-        self.processor = GameProcessor(gameSelection = 2, numberOfGamesToPlay = 10, showVideo = False)
+        self.processor = GameProcessor.Builder().setGameSelection(2).setNumberOfGamesToPlay(10).build()
 
     def test_select_new_game_to_play(self):
         self.processor.selectNewGameToPlay(1)
