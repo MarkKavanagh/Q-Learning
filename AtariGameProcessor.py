@@ -105,6 +105,7 @@ class GameProcessor(object):
             self.__processNewGameFrame()
             self.agent.remember(self.gameState, action, self.reward, self.newGameState, int(self.isDone))
             self.agent.learn()
+            self.agent.update()
             self.gameState = self.newGameState
             self.plotter.printScores(self.gameNumber, self.frameCount, self.gameScore, self.info,
                                      self.agent.avgScoreHistory[-1], self.agent.decisionFactor,

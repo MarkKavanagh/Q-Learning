@@ -54,21 +54,24 @@ class DDQNAgent(object):
         return action
 
     def learn(self):
-        if self.actionCount % self.learningFrequency != 0:
-            return
-        if self.memory.memorySlotCounter > self.batchSize:
-            state, action, reward, newState, done = self.memory.sampleBuffer(self.batchSize)
-            actionEncodings = np.array(self.actionSpace, dtype = np.uint8)
-            actionTaken = np.dot(action, actionEncodings).astype(np.uint8)
+        if self.__hasEnoughMemory() and self.__shouldLearnThisTime():
+            state, actionTaken, newState, reward, done = self.__getActionsStatesAndRewards()
             QValues = self.targetQNetModel.predict(state)
             futureQValues = self.__getMaximumQScoresFromNextStates(newState)
             self.__updateQValues(QValues, reward, futureQValues, actionTaken, done)
             self.__trainTheModelWithUpdatedQValues(QValues, state)
 
-            self.__updateDecisionFactor()
+    def __hasEnoughMemory(self):
+        return self.memory.memorySlotCounter > self.batchSize
 
-            if self.memory.memorySlotCounter % self.updateTargetModelFrequency == 0:
-                self.__updateNetworkParameters()
+    def __shouldLearnThisTime(self):
+        return self.actionCount % self.learningFrequency != 0
+
+    def __getActionsStatesAndRewards(self):
+        state, action, reward, newState, done = self.memory.sampleBuffer(self.batchSize)
+        actionEncodings = np.array(self.actionSpace, dtype = np.uint8)
+        actionTaken = np.dot(action, actionEncodings).astype(np.uint8)
+        return state, actionTaken, newState, reward, done
 
     def __getMaximumQScoresFromNextStates(self, newState):
         nextStatePredictions = self.targetQNetModel.predict(newState)
@@ -88,6 +91,11 @@ class DDQNAgent(object):
             self.accuracy = fit.history["acc"][0] * 100
         except KeyError:
             self.accuracy = 0
+
+    def update(self):
+        self.__updateDecisionFactor()
+        if self.memory.memorySlotCounter % self.updateTargetModelFrequency == 0:
+            self.__updateNetworkParameters()
 
     def __updateDecisionFactor(self):
         self.decisionFactor = self.decisionFactor * self.decisionFactorDecayRate if self.decisionFactor > \
