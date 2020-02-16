@@ -41,3 +41,29 @@ class ReplayBuffer(object):
         terminal = self.isDoneMemory[batch]
 
         return states, actions, rewards, outComeStates, terminal
+
+    class Builder:
+        def __init__(self):
+            self.memorySlots = 1000000
+            self.inputShape = None
+            self.numberOfActions = None
+            self.discreteActions = True
+
+        def setMemorySlots(self, memorySlots):
+            self.memorySlots = memorySlots
+            return self
+
+        def setInputShape(self, inputShape):
+            self.inputShape = inputShape
+            return self
+
+        def setNumberOfActions(self, numberOfActions):
+            self.numberOfActions = numberOfActions
+            return self
+
+        def setDiscreteActions(self, discreteActions):
+            self.discreteActions = discreteActions
+            return self
+
+        def build(self):
+            return ReplayBuffer(self.memorySlots, self.inputShape, self.numberOfActions, self.discreteActions)

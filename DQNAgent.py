@@ -24,7 +24,12 @@ class DDQNAgent(object):
         self.updateTargetModelFrequency = updateTargetModelFrequency
 
         self.actionSpace = np.arange(numberOfActions, dtype = np.uint8)
-        self.memory = ReplayBuffer(memorySlots, inputDimensions, numberOfActions, discreteActions = True)
+        self.memory = ReplayBuffer.Builder() \
+            .setMemorySlots(memorySlots) \
+            .setInputShape(inputDimensions) \
+            .setNumberOfActions(numberOfActions) \
+            .setDiscreteActions(True) \
+            .build()
         self.trainingQNetModel = QNet.Builder().useRmsPropOptimizer(learningRate) \
             .setNumberOfActions(numberOfActions) \
             .setInputDimensions(inputDimensions) \

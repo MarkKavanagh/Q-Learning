@@ -11,7 +11,11 @@ class TestReplayBuffer(TestCase):
         self.memorySlots = 2000
 
     def test_create(self):
-        buffer = ReplayBuffer(self.memorySlots, self.inputShape, self.numberOfActions)
+        buffer = ReplayBuffer.Builder() \
+            .setMemorySlots(self.memorySlots) \
+            .setInputShape(self.inputShape) \
+            .setNumberOfActions(self.numberOfActions) \
+            .build()
         self.assertEqual(buffer.stateMemory.shape, (self.memorySlots, *self.inputShape))
         self.assertEqual(buffer.outcomeStateMemory.shape, (self.memorySlots, *self.inputShape))
         self.assertEqual(buffer.actionMemory.shape, (self.memorySlots, self.numberOfActions))
@@ -20,14 +24,22 @@ class TestReplayBuffer(TestCase):
 
     def test_memory(self):
         memorySlots = 90000
-        buffer = ReplayBuffer(memorySlots, self.inputShape, self.numberOfActions)
+        buffer = ReplayBuffer.Builder() \
+            .setMemorySlots(memorySlots) \
+            .setInputShape(self.inputShape) \
+            .setNumberOfActions(self.numberOfActions) \
+            .build()
         memories = [sys.getsizeof(buffer.stateMemory), sys.getsizeof(buffer.outcomeStateMemory),
                     sys.getsizeof(buffer.actionMemory), sys.getsizeof(buffer.rewardMemory),
                     sys.getsizeof(buffer.isDoneMemory)]
         self.assertTrue(sum(memories) / 1024 ** 3 <= 5)
 
     def test_storeTransition(self):
-        buffer = ReplayBuffer(self.memorySlots, self.inputShape, self.numberOfActions)
+        buffer = ReplayBuffer.Builder() \
+            .setMemorySlots(self.memorySlots) \
+            .setInputShape(self.inputShape) \
+            .setNumberOfActions(self.numberOfActions) \
+            .build()
         for i in range(2 * self.memorySlots):
             state = np.random.randint(100, size = self.inputShape)
             action = np.random.randint(self.numberOfActions, size = self.numberOfActions)
@@ -45,7 +57,11 @@ class TestReplayBuffer(TestCase):
         inputShape = (84, 84, 4)
         memorySlots = 100
         numberOfActions = 4
-        buffer = ReplayBuffer(memorySlots, inputShape, numberOfActions)
+        buffer = ReplayBuffer.Builder() \
+            .setMemorySlots(memorySlots) \
+            .setInputShape(inputShape) \
+            .setNumberOfActions(numberOfActions) \
+            .build()
         for i in range(memorySlots):
             state = np.random.randint(100, size = inputShape)
             action = np.random.randint(numberOfActions, size = numberOfActions)
