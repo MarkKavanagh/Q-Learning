@@ -3,11 +3,11 @@ from keras.models import Model, load_model
 from keras.optimizers import Adam, RMSprop
 
 
-class QNetBuilder(object):
-    __slots__ = ["model", "version", "learningRate", "numberOfActions", "inputDimensions", "useMaxPooling"]
+class QNet(object):
+    __slots__ = ["model", "optimizer", "learningRate", "numberOfActions", "inputDimensions", "useMaxPooling"]
 
-    def __init__(self, learningRate, numberOfActions, inputDimensions, useMaxPooling = False, version = 1):
-        self.version = version
+    def __init__(self, learningRate, numberOfActions, inputDimensions, optimizer, useMaxPooling = False):
+        self.optimizer = optimizer
         self.learningRate = learningRate
         self.numberOfActions = numberOfActions
         self.inputDimensions = inputDimensions
@@ -30,11 +30,7 @@ class QNetBuilder(object):
             fullyConnectedLayers = self.__buildFullyConnectedLayers(inputs)
         outputs = Dense(self.numberOfActions, name="Output_Layer")(fullyConnectedLayers)
         model = Model(inputs = inputs, outputs = outputs, name = "Deep Q-Learning CNN Model")
-        if self.version == 1:
-            optimizer = Adam(lr = self.learningRate)
-        else:
-            optimizer = RMSprop(lr = self.learningRate, rho = 0.95, epsilon = 0.01)
-        model.compile(optimizer = optimizer, loss = "mean_squared_error", metrics = ["acc"])
+        model.compile(optimizer = self.optimizer, loss = "mean_squared_error", metrics = ["acc"])
         return model
 
     @staticmethod
@@ -61,3 +57,36 @@ class QNetBuilder(object):
         for i in range(1, len(fcLayers)):
             layer = Dense(fcLayers[i], name = "Hidden-{n}".format(n = i + 1), activation = "relu")(layer)
         return layer
+
+    class Builder:
+        def __init__(self):
+            self.optimizer = None
+            self.learningRate = None
+            self.numberOfActions = None
+            self.inputDimensions = None
+            self.useMaxPooling = False
+
+        def useRmsPropOptimizer(self, learningRate):
+            self.learningRate = learningRate
+            self.optimizer = RMSprop(lr = learningRate, rho = 0.95, epsilon = 0.01)
+            return self
+
+        def useAdamOptimizer(self, learningRate):
+            self.learningRate = learningRate
+            self.optimizer = Adam(lr = learningRate)
+            return self
+
+        def setNumberOfActions(self, numberOfActions):
+            self.numberOfActions = numberOfActions
+            return self
+
+        def setInputDimensions(self, inputDimensions):
+            self.inputDimensions = inputDimensions
+            return self
+
+        def setUseMaxPooling(self, useMaxPooling):
+            self.useMaxPooling = useMaxPooling
+            return self
+
+        def build(self):
+            return QNet(self.learningRate, self.numberOfActions, self.inputDimensions, self.optimizer, self.useMaxPooling)

@@ -1,5 +1,5 @@
 import numpy as np
-from Policy import QNetBuilder
+from Policy import QNet
 from ReplayBuffer import ReplayBuffer
 
 
@@ -24,10 +24,16 @@ class DDQNAgent(object):
         self.modelName = modelName
         self.updateTargetModelFrequency = updateTargetModelFrequency
         self.memory = ReplayBuffer(memorySlots, inputDimensions, numberOfActions, discreteActions = True)
-        self.trainingQNetModel = QNetBuilder(learningRate, numberOfActions,
-                                             inputDimensions, useMaxPooling, 2).getModel()
-        self.targetQNetModel = QNetBuilder(learningRate, numberOfActions,
-                                           inputDimensions, useMaxPooling, 2).getModel()
+        self.trainingQNetModel = QNet.Builder().useRmsPropOptimizer(learningRate)\
+            .setNumberOfActions(numberOfActions) \
+            .setInputDimensions(inputDimensions) \
+            .setUseMaxPooling(useMaxPooling) \
+            .build().getModel()
+        self.targetQNetModel = QNet.Builder().useRmsPropOptimizer(learningRate) \
+            .setNumberOfActions(numberOfActions) \
+            .setInputDimensions(inputDimensions) \
+            .setUseMaxPooling(useMaxPooling) \
+            .build().getModel()
         self.scoreHistory = np.array([0])
         self.decisionFactorHistory = np.array([1])
         self.avgScoreHistory = np.array([0])
@@ -114,7 +120,7 @@ class DDQNAgent(object):
         self.trainingQNetModel.save(self.modelName)
 
     def loadModel(self):
-        self.trainingQNetModel = QNetBuilder.loadModel(self.modelName)
+        self.trainingQNetModel = QNet.loadModel(self.modelName)
         if self.decisionFactor == 0.0:
             self.__updateNetworkParameters()
 
