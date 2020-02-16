@@ -39,4 +39,4 @@ class TestDDQNAgent(TestCase):
         actions = np.random.randint(numberOfActions, size=memorySlots)
         agent.memory.actionMemory[np.arange(actions.size), actions] = 1
         agent.memory.rewardMemory = np.random.randint(100, size=memorySlots).astype(int8)
-        agent.memory.isDoneMemory = np.random.randint(2, size=memorySlots).astype(uint8)
+        agent.memory.isDoneMemory = np.random.choice(a = [True, False], size=memorySlots).astype(uint8)
