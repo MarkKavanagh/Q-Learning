@@ -107,10 +107,10 @@ class GameProcessor(object):
             self.agent.learn()
             self.agent.update()
             self.gameState = self.newGameState
-            # self.plotter.printScores(self.gameNumber, self.frameCount, self.gameScore, self.info,
-            #                          self.agent.avgScoreHistory[-1], self.agent.decisionFactor,
-            #                          self.numberOfGamesToPlay, self.agent.getModelSummary(),
-            #                          self.agent.accuracy, self.agent.loss)
+            self.plotter.printScores(self.gameNumber, self.frameCount, self.gameScore, self.info,
+                                     self.agent.avgScoreHistory[-1], self.agent.decisionFactor,
+                                     self.numberOfGamesToPlay, self.agent.getModelSummary(),
+                                     self.agent.accuracy, self.agent.loss)
 
     def __playFrame(self):
         action = self.agent.chooseAction(self.gameState)

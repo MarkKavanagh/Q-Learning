@@ -77,7 +77,7 @@ class DDQNAgent(object):
         return self.memory.memorySlotCounter > self.batchSize
 
     def __shouldLearnThisTime(self):
-        return self.actionCount % self.learningFrequency != 0
+        return self.actionCount % self.learningFrequency == 0
 
     def __getActionsStatesAndRewards(self):
         state, action, reward, newState, done = self.memory.sampleBuffer(self.batchSize)
