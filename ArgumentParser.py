@@ -51,16 +51,16 @@ Q-Learning Algorithm
         self.__parseArguments()
 
     def __addArguments(self):
-        self.parser.add_argument("-n", "--notebook", type = bool,
+        self.parser.add_argument("-n", "--notebook", type = str,
                                  help = "[boolean] Use notebook display (default: {nb})"
                                  .format(nb = self.isNotebook))
-        self.parser.add_argument("-p", "--maxpooling", type = bool,
+        self.parser.add_argument("-p", "--maxpooling", type = str,
                                  help = "[boolean]Use max pooling layer in CNN (default: {mp})"
                                  .format(mp = self.useMaxPooling))
-        self.parser.add_argument("-l", "--load", type = bool,
+        self.parser.add_argument("-l", "--load", type = str,
                                  help = "[boolean] Load previous Q-Net model (default: {l})"
                                  .format(l = self.loadPreviousModel))
-        self.parser.add_argument("-r", "--render", type = bool,
+        self.parser.add_argument("-r", "--render", type = str,
                                  help = "[boolean] Render gameplay (default: {r})"
                                  .format(r = self.showVideo))
         self.parser.add_argument("-g", "--games", type = int,
@@ -100,10 +100,10 @@ Q-Learning Algorithm
     def __parseArguments(self):
         args = self.parser.parse_args()
         self.parser = argparse.ArgumentParser()
-        self.isNotebook = self.parseField(args.notebook, self.isNotebook)
-        self.useMaxPooling = self.parseField(args.maxpooling, self.useMaxPooling)
-        self.loadPreviousModel = self.parseField(args.load, self.loadPreviousModel)
-        self.showVideo = self.parseField(args.render, self.showVideo)
+        self.isNotebook = self.parseBooleanField(args.notebook, self.isNotebook)
+        self.useMaxPooling = self.parseBooleanField(args.maxpooling, self.useMaxPooling)
+        self.loadPreviousModel = self.parseBooleanField(args.load, self.loadPreviousModel)
+        self.showVideo = self.parseBooleanField(args.render, self.showVideo)
         self.numberOfGamesToPlay = self.parseField(args.games, self.numberOfGamesToPlay)
         self.memorySlots = self.parseField(args.buffersize, self.memorySlots)
         self.learningRate = self.parseField(args.learningrate, self.learningRate)
@@ -119,3 +119,14 @@ Q-Learning Algorithm
     @staticmethod
     def parseField(argument, field):
         return argument if argument is not None else field
+
+    @staticmethod
+    def parseBooleanField(argument, field):
+        if argument is None:
+            return field
+        elif argument.lower() in ('yes', 'true', 't', 'y', '1'):
+            return True
+        elif argument.lower() in ('no', 'false', 'f', 'n', '0'):
+            return False
+        else:
+            raise argparse.ArgumentTypeError('Boolean value expected.')
