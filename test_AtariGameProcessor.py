@@ -1,14 +1,21 @@
-from unittest import TestCase
+from unittest import TestCase, mock
 from AtariGameProcessor import GameProcessor
 
 
 class TestGameProcessor(TestCase):
     def setUp(self):
-        self.processor = GameProcessor.Builder().setGameSelection(2).setNumberOfGamesToPlay(10).build()
+        with mock.patch("AtariGameProcessor.OutputUtils") as plotterMock:
+            plotterMock.return_value.getStdOut.return_value = 1
+            plotterMock.return_value.printScores.return_value = 1
+            plotterMock.__getStdOut.return_value = 1
+            plotterMock.printScores.return_value = 1
+            self.processor = GameProcessor.Builder().setGameSelection(2).setNumberOfGamesToPlay(10).build()
 
     def test_select_new_game_to_play(self):
-        self.processor.selectNewGameToPlay(1)
-        self.assertTrue(self.processor.gameName, "LunarLander-v2")
+        with mock.patch("AtariGameProcessor.OutputUtils") as plotterMock:
+            plotterMock.return_value.getStdOut.return_value = 1
+            self.processor.selectNewGameToPlay(1)
+            self.assertTrue(self.processor.gameName, "LunarLander-v2")
 
     def test_set_number_of_games_to_play(self):
         self.processor.setNumberOfGamesToPlay(20)
